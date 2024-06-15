@@ -58,7 +58,7 @@ jobs:
       # STEP - Upload Microsoft Security DevOps Results
       # ===============================================
       # Upload the results of the Microsoft Security DevOps to the repo
-      #- name: Upload results to Security tab
-      #  uses: github/codeql-action/upload-sarif@v3
-      #  with:
-      #    sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+      - name: Upload results to Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.msdo.outputs.sarifFile }}
