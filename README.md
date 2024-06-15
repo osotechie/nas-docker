@@ -1,4 +1,3 @@
-
 <div align="center">
 
 <img src="https://avatars.githubusercontent.com/u/34251619?v=4" align="center" width="144px" height="144px"/>
@@ -6,7 +5,7 @@
 ### NAS Docker Stacks Repo
 _... managed with GitHub Actions_ 🤖
 
-[![VALIDATION](https://github.com/osotechie/nas-docker-stacks/actions/workflows/validation.yml/badge.svg?event=pull_request)](https://github.com/osotechie/nas-docker-stacks/actions/workflows/validation.yml) [![DEPLOY](https://github.com/osotechie/nas-docker-stacks/actions/workflows/deploy.yml/badge.svg?event=pull_request)](https://github.com/osotechie/nas-docker-stacks/actions/workflows/deploy.yml)
+[![VALIDATION](https://github.com/osotechie/nas-docker/actions/workflows/validation.yml/badge.svg)](https://github.com/osotechie/nas-docker/actions/workflows/validation.yml) [![DEPLOY](https://github.com/osotechie/nas-docker/actions/workflows/deploy.yml/badge.svg)](https://github.com/osotechie/nas-docker/actions/workflows/deploy.yml)
 
 </div>
 
