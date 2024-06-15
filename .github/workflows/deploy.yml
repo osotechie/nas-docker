@@ -126,7 +126,10 @@ jobs:
       #===========================
       #Copy the contents locally for re-use outside pipelines etc           
       - name: Copy Content Locally
-        run: rsync -avP --exclude=.git,wg0.conf ./* ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
+        run: |
+          #cleanup working files
+          rm ./wg0.conf
+          scp -r !(.git) ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
 
       # STEP - Discconect from Wireguard
       # ================================
