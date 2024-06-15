@@ -1,0 +1,25 @@
+services: 
+
+  Glances:
+    container_name: it-tools
+    hostname: it-tools
+    image: corentinth/it-tools
+    restart: always
+    networks:
+       misc:
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.it-tools.loadbalancer.server.port=80
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.it-tools.rule=Host(`tools.${DOMAIN}`)
+    - traefik.http.routers.it-tools.entryPoints=websecure
+    #- traefik.http.routers.glances.tls.certresolver=cloudflare
+    - traefik.http.routers.it-tools.middlewares=Real-IP@file, Headers@file
+
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  misc:
+    name: misc

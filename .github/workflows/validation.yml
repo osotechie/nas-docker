@@ -1,0 +1,64 @@
+# This is a basic workflow to help you get started with Actions
+
+name: VALIDATION
+
+# Controls when the workflow will run
+on:
+  push:
+    branches-ignore:
+      - main
+  
+  # manually
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  actions: read
+  security-events: write
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+   
+      # STEP - Check-out Rep
+      # ====================
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check-out Repo
+        uses: actions/checkout@v4
+
+      # STEP - Validate docker stacks
+      # =============================
+      # Run a validation check on all the docker-compose.yml files for the different stacks
+      - name: Validate Docker Stacks
+        uses: zyborg/pester-tests-report@v1
+        with:
+          include_paths: .github/workflows/tests
+          #exclude_paths:
+          #exclude_tags: skip_ci
+          tests_fail_step: true
+          report_name: Docker Stacks Validation
+          report_title: Docker Stacks Validation
+          result_value: Passed
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # STEP - Microsoft Security DevOps
+      # ================================
+      # Run a security check on everything for potential security issues
+      - name: Run Microsoft Security DevOps
+        uses: microsoft/security-devops-action@v1
+        id: msdo
+        with:
+          tools: checkov, trivy
+
+      # STEP - Upload Microsoft Security DevOps Results
+      # ===============================================
+      # Upload the results of the Microsoft Security DevOps to the repo
+      #- name: Upload results to Security tab
+      #  uses: github/codeql-action/upload-sarif@v3
+      #  with:
+      #    sarif_file: ${{ steps.msdo.outputs.sarifFile }}

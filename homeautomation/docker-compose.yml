@@ -1,0 +1,150 @@
+services:
+
+  HomeAssistant:
+    container_name: HomeAssistant
+    hostname: homeassistant
+    image:   homeassistant/home-assistant:latest
+    restart: always
+    privileged: true
+    depends_on:
+    - Mosquitto
+    networks:
+      IoT:
+        ipv4_address: 10.1.11.10
+      homeautomation:
+      media:
+      monitor:
+    devices:
+      #- /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2131741-if00:/dev/ttyACM0     #deconz
+      #- /dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_f8b1a7b55e5aed11aae8f5165820eef3-if00-port0:/dev/ttyUSB0  #skyconnect
+      - /dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_489fa21a4da6ed119cb6f3a32981d5c7-if00-port0:/dev/ttyUSB1 #Sonoff
+    volumes:
+      - ${DOCKERDIR}/homeassistant:/config
+      - ${DOCKERDIR}/homeassistant/.ssh:/root/.ssh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/dbus:/var/run/dbus:ro
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.docker.network=O.and.A (IoT)
+    - traefik.http.services.homeassistant.loadbalancer.server.port=8123
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.homeassistant.rule=Host(`homeassistant.${DOMAIN}`)
+    - traefik.http.routers.homeassistant.entryPoints=websecure
+    - traefik.http.routers.homeassistant.middlewares=Real-IP@file, Headers@file
+ 
+
+  NodeRed:
+    container_name: NodeRed
+    hostname: nodered
+    image:   nodered/node-red
+    restart: always
+    privileged: true
+    depends_on:
+    - HomeAssistant
+    networks:
+       IoT:
+        ipv4_address: 10.1.11.11
+    volumes:
+      - ${DOCKERDIR}/nodered:/data
+    devices:
+      - /dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0:/dev/ttyUSB0
+    group_add:
+      - dialout
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.nodered.loadbalancer.server.port=1880
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.nodered.service=nodered
+    - traefik.http.routers.nodered.rule=Host(`nodered.${DOMAIN}`)
+    - traefik.http.routers.nodered.entryPoints=websecure
+    - traefik.http.routers.nodered.middlewares=Real-IP@file, Headers@file
+
+
+  Mosquitto:
+    container_name: Mosquitto
+    hostname: mosquitto
+    image:   eclipse-mosquitto
+    restart: always
+    networks:
+       IoT:
+        ipv4_address: 10.1.11.14
+    volumes:
+      - ${DOCKERDIR}/mosquitto/config:/mosquitto/config
+      - ${DOCKERDIR}/mosquitto/data:/mosquitto/data
+      - ${DOCKERDIR}/mosquitto/log:/mosquitto/log
+  
+    labels:
+    # Traefik - Service
+    - "traefik.enable=false"
+  
+
+  MQTT-Explorer:
+    container_name: MQTT-Explorer
+    hostname: mqtt-explorer
+    image: smeagolworms4/mqtt-explorer:latest
+    restart: always
+    networks:
+       IoT:
+        ipv4_address: 10.1.11.17
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.mqtt-explorer.loadbalancer.server.port=4000
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.mqtt-explorer.rule=Host(`mqttexplorer.${DOMAIN}`)
+    - traefik.http.routers.mqtt-explorer.entryPoints=websecure
+    - traefik.http.routers.mqtt-explorer.middlewares=Real-IP@file, Headers@file
+
+  Frigate:
+    container_name: frigate
+    hostname: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable
+    privileged: true
+    restart: always
+    networks:
+       IoT:
+        ipv4_address: 10.1.11.16
+    devices:
+      - /dev/apex_0:/dev/apex_0
+      - /dev/dri:/dev/dri
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKERDIR}/frigate/config:/config
+      - ${DOCKERDIR}/frigate/media:/media/frigate
+      - ${NAS_DOCKERDIR}/frigate/media/clips:/media/frigate/clips
+      - ${NAS_DOCKERDIR}/frigate/media/recordings:/media/frigate/recordings
+      - type: tmpfs 
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    labels:
+     # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.frigate.loadbalancer.server.port=5000
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.frigate.rule=Host(`frigate.${DOMAIN}`)
+    - traefik.http.routers.frigate.entryPoints=websecure
+    - traefik.http.routers.frigate.middlewares=Real-IP@file, Headers@file
+
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  homeautomation:
+    name: homeautomation
+  media:
+    name: media
+  monitor:
+    name: monitor
+  #External VLANs
+  IoT:
+    name: O.and.A (IoT)
+    driver: macvlan
+    driver_opts:
+      parent: eno1.10
+    ipam:
+      config:
+        - subnet: 10.1.10.0/23
+          gateway: 10.1.10.254

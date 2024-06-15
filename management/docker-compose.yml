@@ -1,0 +1,71 @@
+services: 
+
+  Portainer: 
+    container_name: Portainer 
+    hostname: Portainer 
+    image: portainer/portainer-ce 
+    restart: always
+    networks:
+       management:
+       IoT:
+        ipv4_address: 10.1.11.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+      - ${DOCKERDIR}/portainer:/data 
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.portainer.loadbalancer.server.port=9000
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)
+    - traefik.http.routers.portainer.entryPoints=websecure
+    - traefik.http.routers.portainer.middlewares=Real-IP@file, Headers@file
+
+  WatchTower:
+    container_name: WatchTower
+    hostname: watchtower
+    image: v2tec/watchtower:latest
+    restart: always
+    networks:
+      management:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 3600
+    labels: 
+    # Traefik - General
+    - "traefik.enable=false"
+
+  Dozzle:
+    container_name: Dozzle
+    hostname: dozzle
+    image: amir20/dozzle:latest
+    restart: always
+    networks:
+       management:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.dozzle.loadbalancer.server.port=8080
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.dozzle.rule=Host(`dozzle.${DOMAIN}`)
+    - traefik.http.routers.dozzle.entryPoints=websecure
+    - traefik.http.routers.dozzle.middlewares=Real-IP@file, Headers@file
+
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  management:
+    name: management
+  #External VLANs
+  IoT:
+    name: O.and.A (IoT)
+    driver: macvlan
+    driver_opts:
+      parent: eno1.10
+    ipam:
+      config:
+        - subnet: 10.1.10.0/23
+          gateway: 10.1.10.254

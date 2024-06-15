@@ -1,0 +1,57 @@
+services: 
+
+  SnapRAID: 
+    container_name: SnapRAID 
+    hostname: SnapRAID 
+    privileged: true
+    image: xagaba/snapraid
+    restart: always
+    networks:
+       storage:
+    volumes:
+      - ${DOCKERDIR}/snapraid:/config
+      - /mnt/array:/mnt/array
+      - /dev/disk:/dev/disk
+    devices:  
+      - /dev/sda:/dev/sda
+      - /dev/sdb:/dev/sdb
+      - /dev/sdc:/dev/sdc
+      - /dev/sdd:/dev/sdd
+    labels:
+    # Traefik - Service
+    - traefik.enable=false
+
+  Scrutiny:
+    container_name: Scrutiny
+    hostname: scrutiny
+    image: ghcr.io/analogj/scrutiny:master-omnibus
+    restart: always
+    networks:
+      storage:
+    cap_add:
+      - SYS_ADMIN
+      - SYS_RAWIO
+    volumes:
+      - ${DOCKERDIR}/scrutiny/config:/opt/scrutiny/config
+      - ${DOCKERDIR}/scrutiny/influxdb:/opt/scrutiny/influxdb
+      - /run/udev:/run/udev:ro
+    devices:  
+      - /dev/nvme0:/dev/nvme0
+      - /dev/sda:/dev/sda
+      - /dev/sdb:/dev/sdb
+      - /dev/sdc:/dev/sdc
+      - /dev/sdd:/dev/sdd
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.scrutiny.loadbalancer.server.port=8080
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.scrutiny.rule=Host(`scrutiny.${DOMAIN}`)
+    - traefik.http.routers.scrutiny.entryPoints=websecure
+    - traefik.http.routers.scrutiny.middlewares=Real-IP@file, Headers@file
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  storage:
+    name: storage

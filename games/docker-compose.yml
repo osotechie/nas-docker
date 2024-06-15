@@ -1,0 +1,73 @@
+services:
+
+
+  Minecraft:
+    container_name: Minecraft
+    hostname: minecraft
+    image: itzg/minecraft-server
+    restart: unless-stopped
+    networks:
+       Internal:
+        ipv4_address: 10.1.1.30
+    volumes:
+      - ${DOCKERDIR}/minecraft:/data
+    environment:
+      - TZ=${TZ}
+      - EULA=TRUE
+      - SERVER_NAME="Nico's Minecraft World"
+      - OPS=${MINECRAFT_OPS}
+      - MAX_PLAYERS=10
+      - ALLOW_NETHER=true
+      - MAX_BUILD_HEIGHT=1024
+      - MOTD="Welcome to Nico's Minecraft World"
+      - TYPE=PAPER
+      #- VERSION=1.16.4
+    labels:
+    # Traefik - General
+    - traefik.enable=false
+
+
+  Minecraft-Bedrock-Nico:
+    container_name: Minecraft-Bedrock-Nico
+    hostname: minecraft-bedrock-nico
+    image: lomot/minecraft-bedrock
+    restart: unless-stopped
+    networks:
+       Internal:
+        ipv4_address: 10.1.1.31
+    volumes:
+      - ${DOCKERDIR}/minecraft-bedrock/nico:/data
+    environment:
+      - TZ=${TZ}
+    labels:
+    # Traefik - General
+    - traefik.enable=false
+
+  Minecraft-Bedrock-Hazel:
+    container_name: Minecraft-Bedrock-Hazel
+    hostname: minecraft-bedrock-hazel
+    image: lomot/minecraft-bedrock
+    restart: unless-stopped
+    networks:
+       Internal:
+        ipv4_address: 10.1.1.32
+    volumes:
+      - ${DOCKERDIR}/minecraft-bedrock/hazel:/data
+    environment:
+      - TZ=${TZ}
+    labels:
+    # Traefik - General
+    - traefik.enable=false
+
+#Shared Networks between containers    
+networks:
+  #External VLANs
+  Internal:
+    name: O.and.A
+    driver: macvlan
+    driver_opts:
+      parent: eno1
+    ipam:
+      config:
+        - subnet: 10.1.1.0/24
+          gateway: 10.1.1.254

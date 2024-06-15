@@ -1,0 +1,56 @@
+services: 
+
+  AdGuard:
+    container_name: AdGuard
+    hostname: adguard
+    image: adguard/adguardhome
+    restart: always
+    networks:
+      IoT:
+        ipv4_address: 10.1.11.240
+    volumes:
+      - ${DOCKERDIR}/adguard/config:/opt/adguardhome/conf
+      - ${DOCKERDIR}/adguard/work:/opt/adguardhome/work
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.adguard.loadbalancer.server.port=3000
+    # Traefik - Router - HTTPS - ADMIN
+    - traefik.http.routers.adguard-admin.rule=Host(`adguard.${DOMAIN}`)
+    - traefik.http.routers.adguard-admin.entryPoints=websecure
+    - traefik.http.routers.adguard-admin.middlewares=Headers@file
+    # Traefik - Router - HTTPS - DOH
+    - traefik.http.routers.adguard-doh.rule=Host(`doh.${DOMAIN}`) &&  Path(`/dns-query`)
+    - traefik.http.routers.adguard-doh.entryPoints=websecure
+    - traefik.http.routers.adguard-doh.middlewares=Headers@file
+
+  speedtest:
+    container_name: speedtest
+    hostname: speedtest
+    image: openspeedtest/latest
+    restart: always
+    networks:
+      IoT:
+        ipv4_address: 10.1.11.241
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.speedtest.loadbalancer.server.port=3000
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.speedtest.rule=Host(`speedtest.${DOMAIN}`)
+    - traefik.http.routers.speedtest.entryPoints=websecure
+    - traefik.http.routers.speedtest.middlewares=Real-IP@file, Headers@file
+    
+
+#Shared Networks between containers
+networks:
+  #External VLANs
+  IoT:
+    name: O.and.A (IoT)
+    driver: macvlan
+    driver_opts:
+      parent: eno1.10
+    ipam:
+      config:
+        - subnet: 10.1.10.0/23
+          gateway: 10.1.10.254

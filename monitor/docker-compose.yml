@@ -1,0 +1,64 @@
+services: 
+
+  Glances:
+    container_name: Glances
+    hostname: glances
+    image: nicolargo/glances:3.2.4.2
+    restart: always
+    networks:
+       monitor:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/array/disk1:/mnt/disk1:ro
+      - /mnt/array/disk2:/mnt/disk2:ro
+      - /mnt/array/disk3:/mnt/disk3:ro
+      - /mnt/array/parity1:/mnt/parity1:ro
+      - /mnt/storage:/mnt/storage:ro
+    environment:
+    - GLANCES_OPT=-w
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.glances.loadbalancer.server.port=61208
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.glances.rule=Host(`glances.${DOMAIN}`)
+    - traefik.http.routers.glances.entryPoints=websecure
+    - traefik.http.routers.glances.middlewares=Real-IP@file, Headers@file
+
+
+  netdata:
+    container_name: Netdata
+    hostname: netdata
+    image: netdata/netdata
+    restart: always
+    networks:
+       monitor:
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ${DOCKERDIR}/netdata/config:/etc/netdata
+      - ${DOCKERDIR}/netdata/lib:/varl/lib/netdata
+      - ${DOCKERDIR}/netdata/cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.netdata.loadbalancer.server.port=19999
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.netdata.rule=Host(`netdata.${DOMAIN}`)
+    - traefik.http.routers.netdata.entryPoints=websecure
+    - traefik.http.routers.netdata.middlewares=Real-IP@file, Headers@file
+
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  monitor:
+    name: monitor

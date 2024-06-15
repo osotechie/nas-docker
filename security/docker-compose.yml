@@ -1,0 +1,37 @@
+services: 
+
+  bitwarden:
+    container_name: Bitwarden
+    hostname: bitwarden
+    image: vaultwarden/server
+    restart: always
+    volumes:
+      - ${DOCKERDIR}/bitwarden:/data
+    networks:
+       security:
+    environment:
+      #WEBSOCKET_ENABLED: 'true' # Required to use websockets
+      SIGNUPS_ALLOWED: 'false'   # set to false to disable signups
+      ADMIN_TOKEN: '${BITWARDEN_ADMIN}'
+      # Push Notification based on https://2nistech.world/vaultwarden-activate-push-notification-for-mobile-devices/
+      PUSH_ENABLED: 'true'
+      PUSH_INSTALLATION_ID: ${BITWARDEN_INSTALLATIONID}
+      PUSH_INSTALLATION_KEY: ${BITWARDEN_INSTALLATIONKEY}
+      PUSH_RELAY_BASE_URI: https://push.bitwarden.com
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.bitwarden.loadbalancer.server.port=80
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.bitwarden.service=bitwarden
+    - traefik.http.routers.bitwarden.rule=Host(`bitwarden.${DOMAIN}`)
+    - traefik.http.routers.bitwarden.entryPoints=websecure
+    - traefik.http.routers.bitwarden.tls.certresolver=cloudflare
+    - traefik.http.routers.bitwarden.middlewares=Real-IP@file, Headers@file
+
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  security:
+    name: security

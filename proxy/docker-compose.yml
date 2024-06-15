@@ -1,0 +1,172 @@
+services:
+
+  Traefik:
+    container_name: Traefik
+    hostname: Traefik
+    image: traefik:latest
+    #depends_on:
+    #- Cloudflare-Tunnel
+    command: 
+      # Enable API
+      - --api=true
+      - --api.insecure=false
+      - --api.dashboard=true
+      - --api.debug=true
+      # Enable Docker
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      # Setup EntryPoints
+      #- --entryPoints.web.address=:80
+      - --entryPoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls.certresolver=cloudflare
+      - --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN}
+      - --entrypoints.websecure.http.tls.domains[0].sans=${TRAEFIK_SANS_DOMAINS}
+      #- --entryPoints.DNS-over-TLS.address=:853
+      #- --entrypoints.websecure.forwardedHeaders.trustedIPs=173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22
+      # Certificate Resolver
+      - --certificatesResolvers.cloudflare.acme.dnschallenge=true
+      - --certificatesResolvers.cloudflare.acme.dnschallenge.provider=cloudflare
+      - --certificatesResolvers.cloudflare.acme.dnschallenge.delayBeforeCheck=60
+      - --certificatesResolvers.cloudflare.acme.email=${CF_API_EMAIL}
+      - --certificatesResolvers.cloudflare.acme.storage=/etc/traefik/acme.json
+      # Skip verify on Self-signed certificates for backend services
+      - --serverstransport.insecureskipverify=true
+      # Filer Providers
+      - --providers.file.directory=/etc/traefik/config
+      - --providers.file.watch=true
+      # Pilot
+      #- --pilot.token=${TRAEFIK_PILOT_TOKEN}
+      # Plugins
+      - --experimental.plugins.traefik-real-ip.modulename=github.com/soulbalz/traefik-real-ip
+      - --experimental.plugins.traefik-real-ip.version=v1.0.3
+      # Logging
+      - --log.level=DEBUG
+      - --log.filePath=/var/log/traefik/traefik.log
+      - --accesslog=true
+      - --accesslog.filepath=/var/log/traefik/access.log
+      #- --metrics.prometheus=true
+    restart: always
+    networks:
+      DMZ:
+        ipv4_address: 10.1.254.253
+      IoT:
+        ipv4_address: 10.1.11.253
+      management:
+      proxy:
+      monitor:
+      storage:
+      media:
+      security:
+      ai:
+      misc:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DOCKERDIR}/traefik/config:/etc/traefik
+      - ${DOCKERDIR}/traefik/logs:/var/log/traefik
+      #- ${DOCKERDIR}/certs:/certs
+    environment:
+    - CF_API_EMAIL=${CF_API_EMAIL}
+    - CF_API_KEY=${CF_API_KEY}
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.api.loadbalancer.server.port=8080
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.api.rule=Host(`traefik.${DOMAIN}`)
+    - traefik.http.routers.api.service=api@internal
+    - traefik.http.routers.api.entryPoints=websecure
+    #- traefik.http.routers.api.tls.certresolver=cloudflare
+    - traefik.http.routers.api.middlewares=Real-IP@file, Headers@file
+
+
+  Cloudflare-Companion:
+    container_name: Cloudflare-Companion
+    hostname: Cloudflare-Companion
+    image: tiredofit/traefik-cloudflare-companion:latest
+    restart: always
+    depends_on:
+      - Traefik
+    networks:
+      proxy:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TRAEFIK_VERSION=2
+      - REFRESH_ENTRIES=TRUE
+      - CF_EMAIL=${CF_API_EMAIL}
+      - CF_TOKEN=${CF_API_KEY}
+      - TARGET_DOMAIN=${CF_TUNNEL}.cfargotunnel.com
+      - DOMAIN1=${DOMAIN}
+      - DOMAIN1_ZONE_ID=${CF_ZONE_ID}
+      - DOMAIN1_PROXIED=TRUE
+
+
+  Cloudflare-Tunnel:
+    container_name: Cloudflare-Tunnel
+    hostname: Cloudflare-Tunnel
+    image: cloudflare/cloudflared
+    restart: always
+    networks:
+      DMZ: 
+        ipv4_address: 10.1.254.1
+    volumes:
+      - ${DOCKERDIR}/cloudflare-tunnel:/home/nonroot/.cloudflared
+    command: tunnel --config /home/nonroot/.cloudflared/config.yml run ${CF_TUNNEL}
+
+
+  Whoami:
+    container_name: Whoami
+    hostname: whoami
+    image: containous/whoami
+    restart: always 
+    networks:
+       proxy:
+    labels: 
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.docker.network=proxy
+    - traefik.http.services.whoami.loadbalancer.server.port=80
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.whoami.rule=Host(`whoami.${DOMAIN}`)
+    - traefik.http.routers.whoami.entryPoints=websecure
+    #- traefik.http.routers.whoami.tls.certresolver=cloudflare
+    - traefik.http.routers.whoami.middlewares=Real-IP@file, Headers@file
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  management:
+    name: management
+  proxy:
+    name: proxy
+  monitor:
+    name: monitor
+  storage:
+    name: storage
+  media:
+    name: media
+  security:
+    name: security
+  ai:
+    name: ai
+  misc:
+    name: misc
+  #External VLANs
+  IoT:
+    name: O.and.A (IoT)
+    driver: macvlan
+    driver_opts:
+      parent: eno1.10
+    ipam:
+      config:
+        - subnet: 10.1.10.0/23
+          gateway: 10.1.10.254
+  DMZ:
+    name: O.and.A (zDMZz)
+    driver: macvlan
+    driver_opts:
+      parent: eno1.254
+    ipam:
+      config:
+        - subnet: 10.1.254.0/24
+          gateway: 10.1.254.254

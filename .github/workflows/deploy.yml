@@ -1,0 +1,137 @@
+# This is a basic workflow to help you get started with Actions
+
+name: DEPLOY
+
+# Controls when the workflow will run
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+    paths-ignore:
+        - '**/*.md'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment: nas
+
+    steps:
+
+      # STEP - Check-out Rep
+      # ====================
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check-out Repo
+        uses: actions/checkout@v4
+
+      # STEP - Connect to Azure
+      # =======================
+      # This step is used to connect to Azure to allow reading of Azure KeyVault in later step
+      - name: Connect to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_SPN_CREDENTIALS }}
+
+      # STEP - Get Azure KeyVault Secrets
+      # =================================
+      # Get Secrets from Azure KeyVault and store them as env variables as secrets for use later   
+      - name: Get Azure KeyVault Secrets
+        uses: copdips/get-azure-keyvault-secrets-action@v1
+        with:
+          keyvault: ${{ secrets.AZURE_KEYVAULT_NAME }}
+          
+      # STEP - Replace tokens in .env files
+      # ===================================
+      # Replaces tokens (e.g. #{TOKEN}#) in files with the matching environment variable of the same token name           
+      - name: Replace tokens in .env files
+        uses: cschleiden/replace-tokens@v1
+        with:
+          files: '["**/.env"]'
+
+      # STEP - Connect to Wireguard
+      # ===========================
+      # Install and connect to Wireguard
+      - name: Connect to Wireguard
+        run: |
+          sudo apt install resolvconf
+          sudo apt install wireguard
+          echo "${{ secrets.WG_CONFIG_FILE }}" > wg0.conf
+          sudo chmod 600 wg0.conf
+          sudo wg-quick up ./wg0.conf
+
+       # STEP - Add Route to NAS
+      # ========================
+      # Add route to NAS over Wireguard connection 
+      - name: Add Routes
+        run: |
+          sudo ip route add ${{ secrets.NAS_IP }} via 192.168.200.254 || true
+          ip route show
+          ping ${{ secrets.NAS_IP }} -c 5
+
+       # STEP - Add SSH Keys
+      # ====================
+      # Add SSH Key used to connect to NAS
+      - name: Add SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          # SSH private key
+          key: ${{secrets.SSH_PRIVATE_KEY}}
+          known_hosts: 'placeholder'
+
+      # STEP - Setup SSH known_host entry
+      # =================================
+      # Add NAS SSH host key to known_hosts file
+      - name: Add SSH known_host entry
+        run: |
+          ssh-keyscan -t rsa ${{ secrets.NAS_IP }} >> ~/.ssh/known_hosts
+
+      # FIX - Add ssh config for Docker
+      # =================================
+      # Add the following ssh configs as per docker suggestion https://docs.docker.com/engine/security/protect-access/#ssh-tips          
+      - name: FIX - Add ssh config for Docker
+        run: |
+          set -x
+          echo ControlMaster     auto >> ~/.ssh/config
+          echo ControlPath       ~/.ssh/control-%C >> ~/.ssh/config
+          echo ControlPersist    yes >> ~/.ssh/config
+
+      # STEP - Connect to NAS Docker
+      # ============================
+      # Connect to NAS Docker Daemon 
+      - name: Connect to NAS (Docker Daemon)
+        run: |
+          docker context create NAS --docker "host=ssh://${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}"
+          docker context use NAS
+          docker info
+
+      # STEP - Deploy Stacks
+      # ====================
+      # Deploy docker stacks locally  
+      - name: Deploy Docker Stacks
+        run: |
+          for dir in */; do
+            if [ -f "${dir}docker-compose.yml" ]; then
+              cd "$dir"
+              echo "Deploying ${PWD##*/} stack"
+              docker compose up -d
+              cd ..
+            fi
+          done
+
+      #STEP - Copy Content locally
+      #===========================
+      #Copy the contents locally for re-use outside pipelines etc           
+      - name: Copy Content Locally
+        run: rsync -avP --exclude=.git,wg0.conf ./* ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
+
+      # STEP - Discconect from Wireguard
+      # ================================
+      # Discconect from Wireguard
+      - name: Disconnect from Wireguard
+        if: always()
+        run: |
+          sudo ip link delete wg0

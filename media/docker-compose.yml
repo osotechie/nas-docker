@@ -1,0 +1,200 @@
+services:
+
+  Plex:
+    container_name: Plex
+    hostname: plex
+    image: plexinc/pms-docker
+    restart: always
+    networks:
+       IoT:
+        ipv4_address: 10.1.11.100
+    volumes:
+      - ${DOCKERDIR}/plex:/config
+      - /dev/shm/plex:/transcode 
+      - ${NAS_MEDIADIR}/CHILDREN MOVIES:/media/kidsmovies
+      - ${NAS_MEDIADIR}/MOVIES:/media/movies
+      - ${NAS_MEDIADIR}/TV:/media/tv
+      - ${NAS_MEDIADIR}/MUSIC:/media/music
+    devices:
+    - /dev/dri:/dev/dri
+    environment:
+    - HOSTNAME=O's
+    - ALLOWED_NETWORKS=10.1.1.0/24,10.1.10.0/24,10.1.11.0/24
+    labels:
+    # Traefik - Service
+    - traefik.enable=false
+
+
+  overseerr:
+    container_name: Overseerr
+    hostname: overseerr
+    image: sctx/overseerr:latest
+    restart: always
+    networks:
+       media:
+    volumes:
+      - ${DOCKERDIR}/overseerr:/app/config
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.overseerr.loadbalancer.server.port=5055
+    # Traefik - Router - HTTPS
+    - "traefik.http.routers.overseerr.rule=Host(`overseerr.${DOMAIN}`) || Host(`ombi.${DOMAIN}`)"
+    - traefik.http.routers.overseerr.entryPoints=websecure
+    - traefik.http.routers.overseerr.middlewares=Real-IP@file, Headers@file
+
+  Sonarr:
+    container_name: Sonarr
+    hostname: sonarr
+    image: linuxserver/sonarr:latest
+    restart: always
+    networks:
+       media:
+    volumes:
+      - ${DOCKERDIR}/sonarr:/config
+      - /mnt/storage/downloads:/downloads
+      - ${NAS_MEDIADIR}/TV:/tv
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.sonarr.loadbalancer.server.port=8989
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAIN}`)
+    - traefik.http.routers.sonarr.entryPoints=websecure
+    - traefik.http.routers.sonarr.middlewares=Real-IP@file, Headers@file
+
+
+  Radarr:
+    container_name: Radarr
+    hostname: radarr
+    image:   linuxserver/radarr:latest
+    restart: always
+    networks:
+       media:
+    volumes:
+      - ${DOCKERDIR}/radarr:/config
+      - /mnt/storage/downloads:/downloads
+      - ${NAS_MEDIADIR}/CHILDREN MOVIES:/kidsmovies
+      - ${NAS_MEDIADIR}/MOVIES:/movies
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.radarr.loadbalancer.server.port=7878
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.radarr.rule=Host(`radarr.${DOMAIN}`)
+    - traefik.http.routers.radarr.entryPoints=websecure
+    - traefik.http.routers.radarr.middlewares=Real-IP@file, Headers@file
+
+
+  SABnzbd:
+    container_name: SABnzbd
+    hostname: sabnzbd
+    image: linuxserver/sabnzbd:latest
+    restart: always
+    networks:
+       media:
+    volumes:
+      - ${DOCKERDIR}/sabnzbd:/config
+      - /mnt/storage/downloads:/downloads
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${DOMAIN}`)
+    - traefik.http.routers.sabnzbd.entryPoints=websecure
+    - traefik.http.routers.sabnzbd.middlewares=Real-IP@file, Headers@file
+
+
+  Tautulli:
+    container_name: Tautulli
+    hostname: tautulli
+    image: linuxserver/tautulli:latest
+    restart: always
+    networks:
+       media:
+    volumes:
+      - ${DOCKERDIR}/tautulli:/config
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.tautulli.loadbalancer.server.port=8181
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.tautulli.rule=Host(`tautulli.${DOMAIN}`)
+    - traefik.http.routers.tautulli.entryPoints=websecure
+    - traefik.http.routers.tautulli.middlewares=Real-IP@file, Headers@file
+
+
+  Tdarr:
+    container_name: Tdarr
+    hostname: tdarr
+    image: ghcr.io/haveagitgat/tdarr:latest
+    restart: always
+    networks:
+       media:
+    environment:
+      - TZ=Pacific/Auckland
+      - UMASK_SET=002
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - nodeID=NAS
+    devices:
+    - /dev/dri:/dev/dri
+    volumes:
+      - ${DOCKERDIR}/tdarr/server:/app/server
+      - ${DOCKERDIR}/tdarr/configs:/app/configs
+      - ${DOCKERDIR}/tdarr/logs:/app/logs
+      - ${NAS_MEDIADIR}:/media
+      - /mnt/storage/downloads/transcode_cache:/temp
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.Tdarr.loadbalancer.server.port=8265
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.Tdarr.rule=Host(`tdarr.${DOMAIN}`)
+    - traefik.http.routers.Tdarr.entryPoints=websecure
+    - traefik.http.routers.Tdarr.middlewares=Real-IP@file, Headers@file
+
+  FileBrowser:
+    container_name: FileBrowser
+    hostname: FileBrowser
+    image: filebrowser/filebrowser
+    restart: always
+    networks:
+      media:
+    volumes:
+      - ${DOCKERDIR}/FileBrowser/Data:/data
+      - ${DOCKERDIR}/FileBrowser/Config/filebrowser.db:/filebrowser.db
+      - ${DOCKERDIR}/FileBrowser/Config/filebrowser.json:/.filebrowser.json
+      # Contents to share
+      - ${NAS_MEDIADIR}/CHILDREN MOVIES:/data/media/kidsmovies:ro
+      - ${NAS_MEDIADIR}/MOVIES:/data/media/movies:ro
+      - ${NAS_MEDIADIR}/TV:/data/media/tv:ro
+    environment:
+    - TZ=${TZ}
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.FileBrowser.loadbalancer.server.port=80
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.FileBrowser.rule=Host(`media.${DOMAIN}`)
+    - traefik.http.routers.FileBrowser.entryPoints=websecure
+    - traefik.http.routers.FileBrowser.middlewares=Real-IP@file, Headers@file
+
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  media:
+    name: media
+  #External VLANs
+  IoT:
+    name: O.and.A (IoT)
+    driver: macvlan
+    driver_opts:
+      parent: eno1.10
+    ipam:
+      config:
+        - subnet: 10.1.10.0/23
+          gateway: 10.1.10.254

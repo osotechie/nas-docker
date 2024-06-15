@@ -1,0 +1,28 @@
+services: 
+
+  Autogen-Studio:
+    container_name: autogen
+    hostname: autogen
+    image: daxiongmao87/autogen-studio-ui
+    restart: always
+    networks:
+      ai:
+    environment:
+      - AUTOGEN_HOST=0.0.0.0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.autogen.loadbalancer.server.port=8080
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.autogen.rule=Host(`autogen.${DOMAIN}`)
+    - traefik.http.routers.autogen.entryPoints=websecure
+    - traefik.http.routers.autogen.middlewares=Real-IP@file, Headers@file
+
+
+#Shared Networks between containers
+networks:
+  #Internal Docker Networks
+  ai:
+    name: ai
+    
