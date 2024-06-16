@@ -61,8 +61,12 @@ jobs:
               images_array+=("$image")
           done
 
+          # Convert indexed array to JSON array format
+          json_output=$(jq -n --argjson arr "$(printf '%s\n' "${images_array[@]}" | jq -R . | jq -s .)" '{"image": $arr}')
+
+
           # Output images in the desired array format
-          echo "images="$(echo "${images_array[@]}" | jq -R . | jq -s .) >> $GITHUB_OUTPUT
+          echo "images=$json_output >> $GITHUB_OUTPUT
   
   scan:
     runs-on: ubuntu-latest
