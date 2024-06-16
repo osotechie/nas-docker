@@ -31,7 +31,7 @@ services:
     restart: always
     networks:
       IoT:
-        ipv4_address: 10.1.11.241
+        ipv4_address: 10.1.11.242
     labels:
     # Traefik - Service
     - traefik.enable=true
