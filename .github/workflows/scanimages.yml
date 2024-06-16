@@ -1,10 +1,13 @@
 name: SCAN IMAGES
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    types:
+      - closed
+    branches:
+      - main
+    paths-ignore:
+        - '**/*.md'
   #schedule:
   #  - cron: '40 9 * * 2'
 
@@ -15,11 +18,12 @@ permissions:
 
 jobs:
 
-  getimages:
+  trivy_image_scan:
     runs-on: ubuntu-latest
 
-    outputs:
-      images: ${{ steps.getimages.outputs.images }}
+    strategy:
+      matrix:
+        image: ${{trivy_image_scan.getimages.outputs.images}}
 
     steps:
       - name: Checkout code
@@ -58,19 +62,14 @@ jobs:
           echo "::set-output name=images::["$(IFS=,; echo "${images_array[*]}")"]"
 
 
-  trivy_image_scan:
-    needs: getimages
-    runs-on: ubuntu-latest
-
-    steps:
       # Run Trivy docker image scan
       - name: Run Trivy image vulnerability scanner
         id: trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ getimages.images }}
+          image-ref: ${{ matrix.image }}
           format: "sarif"
-          output: "trivy-${{ getimages.images }}.sarif"
+          output: "trivy-${{ matrix.image }}.sarif"
           ignore-unfixed: true
           vuln-type: "os,library"
           security-checks: "vuln"
@@ -80,5 +79,5 @@ jobs:
         id: upload-results
         uses: github/codeql-action/upload-sarif@v2
         with:
-          category: "trivy-${{ getimages.images }}"
-          sarif_file: "trivy-${{ getimages.images }}.sarif"
+          category: "trivy-${{ matrix.image }}"
+          sarif_file: "trivy-${{ matrix.image }}.sarif"
