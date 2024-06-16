@@ -18,12 +18,12 @@ permissions:
 
 jobs:
 
-  trivy_image_scan:
+
+  prep:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        image: ${{getimages.outputs.images}}
+    outputs:
+      images: ${{ steps.getimages.outputs.images }}
 
     steps:
       - name: Checkout code
@@ -61,6 +61,14 @@ jobs:
           # Output images in the desired array format
           echo "::set-output name=images::["$(IFS=,; echo "${images_array[*]}")"]"
 
+
+  scan:
+    needs: prep
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        image: ${{needs.prep.outputs.images}}
 
       # Run Trivy docker image scan
       - name: Run Trivy image vulnerability scanner
