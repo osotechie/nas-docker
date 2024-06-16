@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        image: ${{trivy_image_scan.getimages.outputs.images}}
+        image: ${{getimages.outputs.images}}
 
     steps:
       - name: Checkout code
