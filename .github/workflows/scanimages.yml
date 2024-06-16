@@ -91,6 +91,7 @@ jobs:
           output: "trivy-${{ matrix.name }}.sarif"
           ignore-unfixed: true
           vuln-type: "os,library"
+          severity: 'CRITICAL,HIGH'
           security-checks: "vuln"
 
       # Upload image report to GitHub Security
