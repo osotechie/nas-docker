@@ -18,16 +18,7 @@ permissions:
 
 jobs:
 
-  getimages:
-    runs-on: ubuntu-latest
-
-    outputs:
-      images: ${{ steps.getimages.outputs.images }}
-
-
-
   trivy_image_scan:
-    needs: getimages
     runs-on: ubuntu-latest
 
     strategy:
