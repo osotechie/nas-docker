@@ -62,7 +62,7 @@ jobs:
           done
 
           # Output images in the desired array format
-          echo "::set-output name=images::["$(IFS=,; echo "${images_array[*]}")"]"
+          echo "images=["$(IFS=,; echo "${images_array[*]}")"]" >> $GITHUB_OUTPUT
   
   scan:
     runs-on: ubuntu-latest
@@ -74,7 +74,7 @@ jobs:
         image: ${{needs.prep.outputs.images}}
 
     steps:
-    
+
       # Run Trivy docker image scan
       - name: Run Trivy image vulnerability scanner
         id: trivy
