@@ -40,7 +40,7 @@ Within the .env file I then create a token (e.g. #{TAG}#), that I can then use t
 
 For GitHub Secrets I simply create a new GitHub Action Repo Secret, this will automatically be made available to any Actions in the repo, and the "Replace Tokens" step to update the .env files. I typically don't use GitHub Action Repo Secrets as you can't easily edit or see the current value of the Secret.
 
-For Azure KeyVault secrets, I use several some additional steps within the GitHub Action to securely connect to Azure KeyVault and retreive secrets ([Azure KeyVault - Get Secrets Fast](https://github.com/marketplace/actions/azure-keyvault-get-secrets-fast)) which then makes them available as secrets within the running Action (just like GitHub Actions Repo Secret).
+For Azure KeyVault secrets, I use several additional steps within the GitHub Action to securely connect to Azure KeyVault and retreive secrets ([Azure KeyVault - Get Secrets Fast](https://github.com/marketplace/actions/azure-keyvault-get-secrets-fast)) which then makes them available as secrets within the running Action (just like GitHub Actions Repo Secret).
 
 
 ## 📑 TEMPLATES
