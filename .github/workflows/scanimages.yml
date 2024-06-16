@@ -73,6 +73,8 @@ jobs:
       matrix:
         image: ${{needs.prep.outputs.images}}
 
+    steps:
+    
       # Run Trivy docker image scan
       - name: Run Trivy image vulnerability scanner
         id: trivy
