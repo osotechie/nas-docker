@@ -92,7 +92,7 @@ jobs:
           ignore-unfixed: true
           vuln-type: "os,library"
           severity: 'CRITICAL,HIGH'
-          security-checks: "vuln"
+          security-checks: "vuln,secret"
 
       # Upload image report to GitHub Security
       - name: Upload Trivy image scan results
