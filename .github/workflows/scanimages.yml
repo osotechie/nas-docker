@@ -62,7 +62,7 @@ jobs:
           done
 
           # Output images in the desired array format
-          echo "images=["$(IFS=,; echo "${images_array[*]}")"]" >> $GITHUB_OUTPUT
+          echo "images="$(echo "${images_array[@]}" | jq -R . | jq -s .) >> $GITHUB_OUTPUT
   
   scan:
     runs-on: ubuntu-latest
@@ -71,7 +71,7 @@ jobs:
 
     strategy:
       matrix:
-        image: ${{needs.prep.outputs.images}}
+        image: ${{fromJson(needs.prep.outputs.images)}}
 
     steps:
 
