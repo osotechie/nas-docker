@@ -131,8 +131,7 @@ jobs:
       - name: Copy Content Locally
         run: |
           #cleanup working files
-          #rm ./wg0.conf
-          tar -cpzf ./test.tar.gz -c .
+          rm ./wg0.conf
           scp -r test.tar.gz ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
 
       # STEP - Discconect from Wireguard
