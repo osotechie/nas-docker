@@ -92,15 +92,6 @@ jobs:
         run: |
           ssh-keyscan -t rsa ${{ secrets.NAS_IP }} >> ~/.ssh/known_hosts
 
-      #STEP - Copy Content locally
-      #===========================
-      #Copy the contents locally for re-use outside pipelines etc           
-      - name: Copy Content Locally
-        run: |
-          #cleanup working files
-          rm ./wg0.conf
-          scp -r ./* ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
-
       # FIX - Add ssh config for Docker
       # =================================
       # Add the following ssh configs as per docker suggestion https://docs.docker.com/engine/security/protect-access/#ssh-tips          
@@ -133,6 +124,15 @@ jobs:
               cd ..
             fi
           done
+
+      #STEP - Copy Content locally
+      #===========================
+      #Copy the contents locally for re-use outside pipelines etc           
+      - name: Copy Content Locally
+        run: |
+          #cleanup working files
+          #rm ./wg0.conf
+          scp -r * ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
 
       # STEP - Discconect from Wireguard
       # ================================
