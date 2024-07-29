@@ -24,6 +24,27 @@ services:
     - traefik.http.routers.adguard-doh.entryPoints=websecure
     - traefik.http.routers.adguard-doh.middlewares=Headers@file
 
+  AdguardHome-sync:
+    container_name: AdguardHome-Sync
+    hostname: adguardhome-sync
+    image: lscr.io/linuxserver/adguardhome-sync:latest
+    restart: always
+    networks:
+      IoT:
+        ipv4_address: 10.1.11.243
+    environment:
+      - CONFIGFILE=/config/adguardhome-sync.yaml #optional
+    volumes:
+      - ${DOCKERDIR}/adguardhome-sync:/config
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.adguardhome-sync.loadbalancer.server.port=8080
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.adguardhome-sync.rule=Host(`adguard-sync.${DOMAIN}`)
+    - traefik.http.routers.speeadguardhome-syncdtest.entryPoints=websecure
+    - traefik.http.routers.adguardhome-sync.middlewares=Real-IP@file, Headers@file
+
   speedtest:
     container_name: speedtest
     hostname: speedtest
