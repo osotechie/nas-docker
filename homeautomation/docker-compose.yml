@@ -139,6 +139,8 @@ networks:
     name: media
   monitor:
     name: monitor
+  ai:
+    name: ai
   #External VLANs
   IoT:
     name: O.and.A (IoT)
