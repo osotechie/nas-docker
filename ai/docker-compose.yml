@@ -19,6 +19,16 @@ services:
     - traefik.http.routers.autogen.entryPoints=websecure
     - traefik.http.routers.autogen.middlewares=Real-IP@file, Headers@file
 
+  Ollama:
+    container_name: ollama
+    hostname: ollama
+    image: ollama/ollama
+    restart: always
+    networks:
+      ai:
+    labels:
+    # Traefik - Service
+    - traefik.enable=false
 
 #Shared Networks between containers
 networks:
