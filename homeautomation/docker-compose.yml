@@ -14,6 +14,7 @@ services:
       homeautomation:
       media:
       monitor:
+      ai:
     devices:
       #- /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2131741-if00:/dev/ttyACM0     #deconz
       #- /dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_f8b1a7b55e5aed11aae8f5165820eef3-if00-port0:/dev/ttyUSB0  #skyconnect
@@ -138,6 +139,8 @@ networks:
     name: media
   monitor:
     name: monitor
+  ai:
+    name: ai
   #External VLANs
   IoT:
     name: O.and.A (IoT)
