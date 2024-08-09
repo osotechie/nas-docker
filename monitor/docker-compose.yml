@@ -12,6 +12,7 @@ services:
       - /mnt/array/disk1:/mnt/disk1:ro
       - /mnt/array/disk2:/mnt/disk2:ro
       - /mnt/array/disk3:/mnt/disk3:ro
+      - /mnt/array/disk4:/mnt/disk4:ro
       - /mnt/array/parity1:/mnt/parity1:ro
       - /mnt/storage:/mnt/storage:ro
     environment:

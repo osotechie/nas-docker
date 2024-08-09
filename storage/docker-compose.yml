@@ -17,6 +17,7 @@ services:
       - /dev/sdb:/dev/sdb
       - /dev/sdc:/dev/sdc
       - /dev/sdd:/dev/sdd
+      - /dev/sde:/dev/sde
     labels:
     # Traefik - Service
     - traefik.enable=false
@@ -41,6 +42,7 @@ services:
       - /dev/sdb:/dev/sdb
       - /dev/sdc:/dev/sdc
       - /dev/sdd:/dev/sdd
+      - /dev/sde:/dev/sde
     labels:
     # Traefik - Service
     - traefik.enable=true
