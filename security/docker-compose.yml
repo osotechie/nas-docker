@@ -29,33 +29,6 @@ services:
     - traefik.http.routers.bitwarden.tls.certresolver=cloudflare
     - traefik.http.routers.bitwarden.middlewares=Real-IP@file, Headers@file
 
-  bitwarden-selfhosted:
-    container_name: Bitwarden-selfhosted
-    hostname: bitwarden-selfhosted
-    image: bitwarden/self-host:beta
-    restart: always
-    volumes:
-      - ${DOCKERDIR}/bitwarden-shelfhosted/etc:/etc/bitwarden
-    networks:
-       security:
-    environment:
-      BW_DOMAIN: bitwarden-selfhosted.${DOMAIN}
-      BW_DB_PROVIDER: sqllite
-      BW_INSTALLATION_ID: ${BITWARDEN_INSTALLATIONID}
-      BW_INSTALLATION_KEY: ${BITWARDEN_INSTALLATIONKEY}
-      globalSettings__disableUserRegistration: true
-    labels:
-    # Traefik - Service
-    - traefik.enable=true
-    - traefik.http.services.bitwarden-sh.loadbalancer.server.port=80
-    # Traefik - Router - HTTPS
-    - traefik.http.routers.bitwarden-sh.service=bitwarden-sh
-    - traefik.http.routers.bitwarden-sh.rule=Host(`bitwarden-selfhosted.${DOMAIN}`)
-    - traefik.http.routers.bitwarden-sh.entryPoints=websecure
-    - traefik.http.routers.bitwarden-sh.tls.certresolver=cloudflare
-    - traefik.http.routers.bitwarden-sh.middlewares=Real-IP@file, Headers@file
-
-
 #Shared Networks between containers
 networks:
   #Internal Docker Networks
