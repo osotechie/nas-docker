@@ -39,11 +39,11 @@ services:
     networks:
        security:
     environment:
-      - BW_DOMAIN: bitwarden-selfhosted.${DOMAIN}
-      - BW_DB_PROVIDER: sqllite
-      - BW_INSTALLATION_ID: ${BITWARDEN_INSTALLATIONID}
-      - BW_INSTALLATION_KEY: ${BITWARDEN_INSTALLATIONKEY}
-      - globalSettings__disableUserRegistration: true
+      BW_DOMAIN: bitwarden-selfhosted.${DOMAIN}
+      BW_DB_PROVIDER: sqllite
+      BW_INSTALLATION_ID: ${BITWARDEN_INSTALLATIONID}
+      BW_INSTALLATION_KEY: ${BITWARDEN_INSTALLATIONKEY}
+      globalSettings__disableUserRegistration: true
     labels:
     # Traefik - Service
     - traefik.enable=true
