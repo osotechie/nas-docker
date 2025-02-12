@@ -123,7 +123,7 @@ services:
     labels:
      # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.frigate.loadbalancer.server.port=5000
+    - traefik.http.services.frigate.loadbalancer.server.port=8971
     # Traefik - Router - HTTPS
     - traefik.http.routers.frigate.rule=Host(`frigate.${DOMAIN}`)
     - traefik.http.routers.frigate.entryPoints=websecure
