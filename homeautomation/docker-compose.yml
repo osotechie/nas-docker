@@ -110,6 +110,7 @@ services:
     devices:
       - /dev/apex_0:/dev/apex_0
       - /dev/dri:/dev/dri
+    shm_size: "512mb"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERDIR}/frigate/config:/config
