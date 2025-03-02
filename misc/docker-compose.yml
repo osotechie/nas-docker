@@ -18,6 +18,49 @@ services:
     - traefik.http.routers.it-tools.middlewares=Real-IP@file, Headers@file
 
 
+  Stirling-PDF:
+    container_name: stirling-pdf
+    hostname: stirling-pdf
+    image: stirlingtools/stirling-pdf:latest
+    restart: always
+    networks:
+       misc:
+    volumes:
+      - ${DOCKERDIR}/Stirling-PDF/trainingData:/usr/share/tessdata # Required for extra OCR languages
+      - ${DOCKERDIR}/Stirling-PDF/extraConfigs:/configs
+      - ${DOCKERDIR}/Stirling-PDF/customFiles:/customFiles/
+      - ${DOCKERDIR}/Stirling-PDF/logs:/logs/
+      - ${DOCKERDIR}/Stirling-PDF/pipeline:/pipeline/
+    environment:
+    #  - DOCKER_ENABLE_SECURITY=false
+      - LANGS=en_GB
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.stirling-pdf.loadbalancer.server.port=8080
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.stirling-pdf.rule=Host(`pdf.${DOMAIN}`)
+    - traefik.http.routers.stirling-pdf.entryPoints=websecure
+    - traefik.http.routers.stirling-pdf.middlewares=Real-IP@file, Headers@file
+
+  ConvertX: 
+    container_name: convertx
+    hostname: convertx
+    image: ghcr.io/c4illin/convertx
+    restart: always
+    networks:
+       misc:
+    volumes:
+      - ${DOCKERDIR}/ConvertX/:/app/data
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.convertx.loadbalancer.server.port=3000
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.convertx.rule=Host(`convert.${DOMAIN}`)
+    - traefik.http.routers.convertx.entryPoints=websecure
+    - traefik.http.routers.convertx.middlewares=Real-IP@file, Headers@file
+    
 #Shared Networks between containers
 networks:
   #Internal Docker Networks
