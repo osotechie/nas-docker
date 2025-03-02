@@ -3,7 +3,7 @@ services:
   Autogen-Studio:
     container_name: autogen
     hostname: autogen
-    image: daxiongmao87/autogen-studio-ui
+    image: ghcr.io/lludlow/autogen-studio
     restart: always
     networks:
       ai:
@@ -13,7 +13,7 @@ services:
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.autogen.loadbalancer.server.port=8080
+    - traefik.http.services.autogen.loadbalancer.server.port=8081
     # Traefik - Router - HTTPS
     - traefik.http.routers.autogen.rule=Host(`autogen.${DOMAIN}`)
     - traefik.http.routers.autogen.entryPoints=websecure
