@@ -55,7 +55,7 @@ services:
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.convertx.loadbalancer.server.port=8080
+    - traefik.http.services.convertx.loadbalancer.server.port=3000
     # Traefik - Router - HTTPS
     - traefik.http.routers.convertx.rule=Host(`convert.${DOMAIN}`)
     - traefik.http.routers.convertx.entryPoints=websecure
