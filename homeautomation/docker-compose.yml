@@ -110,6 +110,7 @@ services:
     devices:
       - /dev/apex_0:/dev/apex_0
       - /dev/dri:/dev/dri
+    shm_size: "512mb"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKERDIR}/frigate/config:/config
@@ -123,7 +124,7 @@ services:
     labels:
      # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.frigate.loadbalancer.server.port=5000
+    - traefik.http.services.frigate.loadbalancer.server.port=8971
     # Traefik - Router - HTTPS
     - traefik.http.routers.frigate.rule=Host(`frigate.${DOMAIN}`)
     - traefik.http.routers.frigate.entryPoints=websecure
