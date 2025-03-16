@@ -42,7 +42,7 @@ services:
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.openwebui.loadbalancer.server.port=3000
+    - traefik.http.services.openwebui.loadbalancer.server.port=8080
     # Traefik - Router - HTTPS
     - traefik.http.routers.openwebui.rule=Host(`ai.${DOMAIN}`)
     - traefik.http.routers.openwebui.entryPoints=websecure
