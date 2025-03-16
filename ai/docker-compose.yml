@@ -30,6 +30,24 @@ services:
     # Traefik - Service
     - traefik.enable=false
 
+  Open-WebUI:
+    container_name: open-webui
+    hostname: open-webui
+    image: ghcr.io/open-webui/open-webui:latest
+    restart: always
+    networks:
+      ai:
+    volumes:
+      - ${DOCKERDIR}/open-webui:/app/backend/data
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.openwebui.loadbalancer.server.port=3000
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.openwebui.rule=Host(`ai.${DOMAIN}`)
+    - traefik.http.routers.openwebui.entryPoints=websecure
+    - traefik.http.routers.openwebui.middlewares=Real-IP@file, Headers@file
+
 #Shared Networks between containers
 networks:
   #Internal Docker Networks
