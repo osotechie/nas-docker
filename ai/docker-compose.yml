@@ -52,6 +52,8 @@ services:
     container_name: litellm
     hostname: litellm
     image: ghcr.io/berriai/litellm:main-latest
+    depends_on:
+      - litellm-db
     restart: always
     networks:
       ai:
@@ -59,6 +61,14 @@ services:
       - ${DOCKERDIR}/litellm/config.yaml:/app/config.yaml
     environment:
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
+      DATABASE_URL: "postgresql://llmproxy:dbpassword9090@litellm-db:5432/litellm"
+      STORE_MODEL_IN_DB: "True" # allows adding models to proxy via UI
+    healthcheck:  # Defines the health check configuration for the container
+      test: [ "CMD", "curl", "-f", "http://localhost:4000/health/liveliness || exit 1" ]  # Command to execute for health check
+      interval: 30s  # Perform health check every 30 seconds
+      timeout: 10s   # Health check command times out after 10 seconds
+      retries: 3     # Retry up to 3 times if health check fails
+      start_period: 40s  # Wait 40 seconds after container start before beginning health checks
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -68,7 +78,27 @@ services:
     - traefik.http.routers.litellm.entryPoints=websecure
     - traefik.http.routers.litellm.middlewares=Real-IP@file, Headers@file
 
-
+  LiteLLM-db:
+    container_name: litellm-db
+    hostname: litellm-db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: llmproxy
+      POSTGRES_PASSWORD: dbpassword9090
+    ports:
+      - "5432:5432"
+    volumes:
+      - ${DOCKERDIR}/litellm/db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d litellm -U llmproxy"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    labels:
+    # Traefik - Service
+    - traefik.enable=false
 
 #Shared Networks between containers
 networks:
