@@ -57,6 +57,8 @@ services:
       ai:
     volumes:
       - ${DOCKERDIR}/litellm/config.yaml:/app/config.yaml
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
     labels:
     # Traefik - Service
     - traefik.enable=true
