@@ -48,6 +48,26 @@ services:
     - traefik.http.routers.openwebui.entryPoints=websecure
     - traefik.http.routers.openwebui.middlewares=Real-IP@file, Headers@file
 
+  LiteLLM:
+    container_name: litellm
+    hostname: litellm
+    image: ghcr.io/berriai/litellm:main-latest
+    restart: always
+    networks:
+      ai:
+    volumes:
+      - ${DOCKERDIR}/litellm/config.yaml:/app/config.yaml
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.litellm.loadbalancer.server.port=4000
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.litellm.rule=Host(`litellm.${DOMAIN}`)
+    - traefik.http.routers.litellm.entryPoints=websecure
+    - traefik.http.routers.litellm.middlewares=Real-IP@file, Headers@file
+
+
+
 #Shared Networks between containers
 networks:
   #Internal Docker Networks
