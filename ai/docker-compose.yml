@@ -53,7 +53,7 @@ services:
     hostname: litellm
     image: ghcr.io/berriai/litellm:main-latest
     depends_on:
-      - litellm-db
+      - LiteLLM-db
     restart: always
     networks:
       ai:
