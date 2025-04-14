@@ -57,6 +57,29 @@ services:
     - traefik.http.routers.netdata.entryPoints=websecure
     - traefik.http.routers.netdata.middlewares=Real-IP@file, Headers@file
 
+  uptime-kuma:
+    container_name: uptime-kuma
+    hostname: uptime-kuma
+    image: louislam/uptime-kuma:latest
+    restart: always
+    networks:
+       monitor:
+    volumes:
+      - ${DOCKERDIR}/uptime-kuma/data:/app/data
+      - ${DOCKERDIR}/uptime-kuma/server:/app/server
+      - ${DOCKERDIR}/uptime-kuma/db:/app/db
+      #Monitoring
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.uptime-kuma.loadbalancer.server.port=3001
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.uptime-kuma.rule=Host(`uptime.${DOMAIN}`)
+    - traefik.http.routers.uptime-kuma.entryPoints=websecure
+    - traefik.http.routers.uptime-kuma.middlewares=Real-IP@file, Headers@file
+
+
 
 #Shared Networks between containers
 networks:
