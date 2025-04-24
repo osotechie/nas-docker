@@ -48,6 +48,17 @@ services:
     - traefik.http.routers.openwebui.entryPoints=websecure
     - traefik.http.routers.openwebui.middlewares=Real-IP@file, Headers@file
 
+  OpenAI-Edge-TTS:
+    container_name: openai-edge-tts
+    hostname: openai-edge-tts
+    image: travisvn/openai-edge-tts:latest
+    restart: always
+    networks:
+      ai:
+    labels:
+    # Traefik - Service
+    - traefik.enable=false
+
   LiteLLM:
     container_name: litellm
     hostname: litellm
