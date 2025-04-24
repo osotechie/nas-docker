@@ -61,7 +61,7 @@ services:
       - ${DOCKERDIR}/litellm/config.yaml:/app/config.yaml
     environment:
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
-      DATABASE_URL: "postgresql://llmproxy:dbpassword9090@litellm-db:5432/litellm"
+      DATABASE_URL: "postgresql://${LITELLM_DB_USER}:${LITELLM_DB_PASS}@litellm-db:5432/litellm"
       STORE_MODEL_IN_DB: "True" # allows adding models to proxy via UI
     healthcheck:  # Defines the health check configuration for the container
       test: [ "CMD", "curl", "-f", "http://localhost:4000/health/liveliness || exit 1" ]  # Command to execute for health check
@@ -85,10 +85,10 @@ services:
     restart: always
     environment:
       POSTGRES_DB: litellm
-      POSTGRES_USER: llmproxy
-      POSTGRES_PASSWORD: dbpassword9090
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${LITELLM_DB_USER}
+      POSTGRES_PASSWORD: ${LITELLM_DB_PASS}
+    networks:
+      ai:
     volumes:
       - ${DOCKERDIR}/litellm/db:/var/lib/postgresql/data
     healthcheck:
