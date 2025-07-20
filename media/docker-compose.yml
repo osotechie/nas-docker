@@ -85,6 +85,23 @@ services:
     - traefik.http.routers.radarr.entryPoints=websecure
     - traefik.http.routers.radarr.middlewares=Real-IP@file, Headers@file
 
+  Maintainerr:
+    container_name: maintainerr
+    hostname: maintainerr
+    image: ghcr.io/jorenn92/maintainerr:latest
+    restart: always
+    networks:
+       media:
+    volumes:
+      - ${DOCKERDIR}/maintainerr:/opt/data
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.maintainerr.loadbalancer.server.port=6246
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.maintainerr.rule=Host(`maintainerr.${DOMAIN}`)
+    - traefik.http.routers.maintainerr.entryPoints=websecure
+    - traefik.http.routers.maintainerr.middlewares=Real-IP@file, Headers@file
 
   SABnzbd:
     container_name: SABnzbd
