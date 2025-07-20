@@ -63,7 +63,6 @@ services:
     - traefik.http.routers.sonarr.entryPoints=websecure
     - traefik.http.routers.sonarr.middlewares=Real-IP@file, Headers@file
 
-
   Radarr:
     container_name: Radarr
     hostname: radarr
