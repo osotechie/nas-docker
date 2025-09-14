@@ -52,6 +52,25 @@ services:
     - traefik.http.routers.scrutiny.entryPoints=websecure
     - traefik.http.routers.scrutiny.middlewares=Real-IP@file, Headers@file
 
+  Crashplan:
+    container_name: crashplan
+    hostname: crashplan
+    image: jlesage/crashplan-pro
+    restart: always
+    networks:
+      storage:
+    volumes:
+      - ${DOCKERDIR}/crashplan/config:/config
+      - /mnt/storage:/storage:ro
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.crashplan.loadbalancer.server.port=5800
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.crashplan.rule=Host(`crashplan.${DOMAIN}`)
+    - traefik.http.routers.crashplan.entryPoints=websecure
+    - traefik.http.routers.crashplan.middlewares=Real-IP@file, Headers@file
+
 #Shared Networks between containers
 networks:
   #Internal Docker Networks
