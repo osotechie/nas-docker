@@ -62,23 +62,6 @@ services:
     - traefik.http.routers.convertx.entryPoints=websecure
     - traefik.http.routers.convertx.middlewares=Real-IP@file, Headers@file
 
-
-  13ft:
-    container_name: 13ft
-    hostname: 13ft
-    image: wasimaster/13ft
-    restart: always
-    networks:
-      misc:
-    labels:
-    # Traefik - Service
-    - traefik.enable=true
-    - traefik.http.services.13ft.loadbalancer.server.port=5000
-    # Traefik - Router - HTTPS
-    - traefik.http.routers.13ft.rule=Host(`13ft.${DOMAIN}`)
-    - traefik.http.routers.13ft.entryPoints=websecure
-    - traefik.http.routers.13ft.middlewares=Real-IP@file, Headers@file 
-
     
 #Shared Networks between containers
 networks:
