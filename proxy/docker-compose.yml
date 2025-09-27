@@ -59,6 +59,7 @@ services:
       security:
       ai:
       misc:
+      games:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${DOCKERDIR}/traefik/config:/etc/traefik
@@ -151,6 +152,8 @@ networks:
     name: ai
   misc:
     name: misc
+  games:
+    name: games
   #External VLANs
   IoT:
     name: O.and.A (IoT)
