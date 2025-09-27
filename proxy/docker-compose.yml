@@ -151,6 +151,8 @@ networks:
     name: ai
   misc:
     name: misc
+  games:
+    name: games
   #External VLANs
   IoT:
     name: O.and.A (IoT)

@@ -59,8 +59,34 @@ services:
     # Traefik - General
     - traefik.enable=false
 
+  amp:
+    container_name: amp
+    hostname: amp
+    image: mitchtalmadge/amp-dockerized:latest
+    restart: always
+    networks:
+      games:
+        mac_address: 02:42:AC:C1:3B:68 # Please see the README about this field.
+    volumes:
+      - ${DOCKERDIR}/amp:/home/amp/.ampdata
+    environment:
+      - "TZ=Pacific/Auckland" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      - "LICENCE=#########-####-#####-##########"
+      - "MODULE=ADS"
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.amp.loadbalancer.server.port=8080
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.amp.rule=Host(`amp.${DOMAIN}`)
+    - traefik.http.routers.amp.entryPoints=websecure
+    - traefik.http.routers.amp.middlewares=Real-IP@file, Headers@file
+
+
 #Shared Networks between containers    
 networks:
+  games:
+    name: games
   #External VLANs
   Internal:
     name: O.and.A
