@@ -7,8 +7,7 @@ services:
     image: itzg/minecraft-server
     restart: unless-stopped
     networks:
-       Internal:
-        ipv4_address: 10.1.1.30
+       games:
     volumes:
       - ${DOCKERDIR}/minecraft:/data
     environment:
@@ -33,8 +32,7 @@ services:
     image: lomot/minecraft-bedrock
     restart: unless-stopped
     networks:
-       Internal:
-        ipv4_address: 10.1.1.31
+      games:
     volumes:
       - ${DOCKERDIR}/minecraft-bedrock/nico:/data
     environment:
@@ -49,8 +47,7 @@ services:
     image: lomot/minecraft-bedrock
     restart: unless-stopped
     networks:
-       Internal:
-        ipv4_address: 10.1.1.32
+      games:
     volumes:
       - ${DOCKERDIR}/minecraft-bedrock/hazel:/data
     environment:
@@ -71,7 +68,6 @@ services:
       - ${DOCKERDIR}/amp:/home/amp/.ampdata
     environment:
       - "TZ=Pacific/Auckland" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-      - "LICENCE=#########-####-#####-##########"
       - "MODULE=ADS"
     labels:
     # Traefik - Service
@@ -82,6 +78,15 @@ services:
     - traefik.http.routers.amp.entryPoints=websecure
     - traefik.http.routers.amp.middlewares=Real-IP@file, Headers@file
 
+  playit:
+    container_name: playit
+    hostname: playit
+    image: ghcr.io/playit-cloud/playit-agent:0.16
+    restart: always
+    networks: 
+      games:
+    environment:
+      - SECRET_KEY=${PLAYIT_SECRET}
 
 #Shared Networks between containers    
 networks:
