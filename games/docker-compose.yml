@@ -1,6 +1,5 @@
 services:
 
-
   # Minecraft:
   #   container_name: Minecraft
   #   hostname: minecraft
@@ -56,6 +55,7 @@ services:
   #   # Traefik - General
   #   - traefik.enable=false
 
+
   amp:
     container_name: amp
     hostname: amp
@@ -69,6 +69,7 @@ services:
       - ${DOCKERDIR}/amp:/home/amp/.ampdata
     environment:
       - "TZ=Pacific/Auckland" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      - "Licence="
       - "MODULE=ADS"
     labels:
     # Traefik - Service
