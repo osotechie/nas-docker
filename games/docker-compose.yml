@@ -68,9 +68,9 @@ services:
     volumes:
       - ${DOCKERDIR}/amp:/home/amp/.ampdata
     environment:
-      - "TZ=Pacific/Auckland" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-      - "Licence="
-      - "MODULE=ADS"
+      - TZ=Pacific/Auckland # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      - Licence=${AMP_LICENSE}
+      - MODULE=ADS
     labels:
     # Traefik - Service
     - traefik.enable=true
