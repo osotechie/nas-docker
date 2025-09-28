@@ -154,6 +154,10 @@ networks:
     name: misc
   games:
     name: games
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.22.0.0/24"
   #External VLANs
   IoT:
     name: O.and.A (IoT)
