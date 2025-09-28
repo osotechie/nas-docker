@@ -1,60 +1,60 @@
 services:
 
 
-  Minecraft:
-    container_name: Minecraft
-    hostname: minecraft
-    image: itzg/minecraft-server
-    restart: unless-stopped
-    networks:
-       games:
-    volumes:
-      - ${DOCKERDIR}/minecraft:/data
-    environment:
-      - TZ=${TZ}
-      - EULA=TRUE
-      - SERVER_NAME="Nico's Minecraft World"
-      - OPS=${MINECRAFT_OPS}
-      - MAX_PLAYERS=10
-      - ALLOW_NETHER=true
-      - MAX_BUILD_HEIGHT=1024
-      - MOTD="Welcome to Nico's Minecraft World"
-      - TYPE=PAPER
-      #- VERSION=1.16.4
-    labels:
-    # Traefik - General
-    - traefik.enable=false
+  # Minecraft:
+  #   container_name: Minecraft
+  #   hostname: minecraft
+  #   image: itzg/minecraft-server
+  #   restart: unless-stopped
+  #   networks:
+  #      games:
+  #   volumes:
+  #     - ${DOCKERDIR}/minecraft:/data
+  #   environment:
+  #     - TZ=${TZ}
+  #     - EULA=TRUE
+  #     - SERVER_NAME="Nico's Minecraft World"
+  #     - OPS=${MINECRAFT_OPS}
+  #     - MAX_PLAYERS=10
+  #     - ALLOW_NETHER=true
+  #     - MAX_BUILD_HEIGHT=1024
+  #     - MOTD="Welcome to Nico's Minecraft World"
+  #     - TYPE=PAPER
+  #     #- VERSION=1.16.4
+  #   labels:
+  #   # Traefik - General
+  #   - traefik.enable=false
 
 
-  Minecraft-Bedrock-Nico:
-    container_name: Minecraft-Bedrock-Nico
-    hostname: minecraft-bedrock-nico
-    image: lomot/minecraft-bedrock
-    restart: unless-stopped
-    networks:
-      games:
-    volumes:
-      - ${DOCKERDIR}/minecraft-bedrock/nico:/data
-    environment:
-      - TZ=${TZ}
-    labels:
-    # Traefik - General
-    - traefik.enable=false
+  # Minecraft-Bedrock-Nico:
+  #   container_name: Minecraft-Bedrock-Nico
+  #   hostname: minecraft-bedrock-nico
+  #   image: lomot/minecraft-bedrock
+  #   restart: unless-stopped
+  #   networks:
+  #     games:
+  #   volumes:
+  #     - ${DOCKERDIR}/minecraft-bedrock/nico:/data
+  #   environment:
+  #     - TZ=${TZ}
+  #   labels:
+  #   # Traefik - General
+  #   - traefik.enable=false
 
-  Minecraft-Bedrock-Hazel:
-    container_name: Minecraft-Bedrock-Hazel
-    hostname: minecraft-bedrock-hazel
-    image: lomot/minecraft-bedrock
-    restart: unless-stopped
-    networks:
-      games:
-    volumes:
-      - ${DOCKERDIR}/minecraft-bedrock/hazel:/data
-    environment:
-      - TZ=${TZ}
-    labels:
-    # Traefik - General
-    - traefik.enable=false
+  # Minecraft-Bedrock-Hazel:
+  #   container_name: Minecraft-Bedrock-Hazel
+  #   hostname: minecraft-bedrock-hazel
+  #   image: lomot/minecraft-bedrock
+  #   restart: unless-stopped
+  #   networks:
+  #     games:
+  #   volumes:
+  #     - ${DOCKERDIR}/minecraft-bedrock/hazel:/data
+  #   environment:
+  #     - TZ=${TZ}
+  #   labels:
+  #   # Traefik - General
+  #   - traefik.enable=false
 
   amp:
     container_name: amp
@@ -63,6 +63,7 @@ services:
     restart: always
     networks:
       games:
+        ipv4_address: 172.22.0.1
         mac_address: 02:42:AC:C1:3B:68 # Please see the README about this field.
     volumes:
       - ${DOCKERDIR}/amp:/home/amp/.ampdata
@@ -85,6 +86,7 @@ services:
     restart: always
     networks: 
       games:
+        ipv4_address: 172.22.0.253
     environment:
       - SECRET_KEY=${PLAYIT_SECRET}
 
@@ -92,6 +94,11 @@ services:
 networks:
   games:
     name: games
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.22.0.0/24"
+
   #External VLANs
   Internal:
     name: O.and.A
