@@ -62,6 +62,8 @@ services:
     volumes:
       - ${DOCKERDIR}/crashplan/config:/config
       - /mnt/storage:/storage:ro
+    environment:
+      - CRASHPLAN_SRV_MAX_MEM=4096
     labels:
     # Traefik - Service
     - traefik.enable=true
