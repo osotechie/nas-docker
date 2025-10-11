@@ -63,7 +63,7 @@ services:
     restart: always
     networks:
       games:
-        ipv4_address: 172.22.0.1
+        ipv4_address: 10.1.20.3
         mac_address: 02:42:AC:C1:3B:68 # Please see the README about this field.
     volumes:
       - ${DOCKERDIR}/amp:/home/amp/.ampdata
@@ -87,7 +87,7 @@ services:
     restart: always
     networks: 
       games:
-        ipv4_address: 172.22.0.253
+        ipv4_address: 10.1.20.253
     environment:
       - SECRET_KEY=${PLAYIT_SECRET}
 
