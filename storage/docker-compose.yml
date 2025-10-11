@@ -63,7 +63,7 @@ services:
       - ${DOCKERDIR}/crashplan/config:/config
       - /mnt/storage:/storage:ro
     environment:
-      - CRASHPLAN_SRV_MAX_MEM=4096
+      - CRASHPLAN_SRV_MAX_MEM=4G
     labels:
     # Traefik - Service
     - traefik.enable=true
