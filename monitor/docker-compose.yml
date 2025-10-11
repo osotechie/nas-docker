@@ -9,12 +9,13 @@ services:
        monitor:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /mnt/array/disk1:/mnt/disk1:ro
-      - /mnt/array/disk2:/mnt/disk2:ro
-      - /mnt/array/disk3:/mnt/disk3:ro
-      - /mnt/array/disk4:/mnt/disk4:ro
-      - /mnt/array/parity1:/mnt/parity1:ro
-      - /mnt/storage:/mnt/storage:ro
+      - /dev/nvme0:/dev/nvme0:ro
+      - /dev/sda:/dev/sda:ro
+      - /dev/sdb:/dev/sdb:ro
+      - /dev/sdc:/dev/sdc:ro
+      - /dev/sdd:/dev/sdd:ro
+      - /dev/sde:/dev/sde:ro
+      #- /mnt/storage:/mnt/storage:ro
     environment:
     - GLANCES_OPT=-w
     labels:
