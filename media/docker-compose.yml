@@ -177,12 +177,14 @@ services:
     hostname: FileBrowser
     image: filebrowser/filebrowser
     restart: always
+    user: "1001:1001"
     networks:
       media:
     volumes:
+      - ${DOCKERDIR}/FileBrowser/Srv:/srv
       - ${DOCKERDIR}/FileBrowser/Data:/data
-      - ${DOCKERDIR}/FileBrowser/Config/filebrowser.db:/filebrowser.db
-      - ${DOCKERDIR}/FileBrowser/Config/filebrowser.json:/.filebrowser.json
+      - ${DOCKERDIR}/FileBrowser/Database:/database
+      - ${DOCKERDIR}/FileBrowser/Config:/config
       # Contents to share
       - ${NAS_MEDIADIR}/CHILDREN MOVIES:/data/media/kidsmovies:ro
       - ${NAS_MEDIADIR}/MOVIES:/data/media/movies:ro

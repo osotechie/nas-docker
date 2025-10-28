@@ -4,8 +4,8 @@ services:
     container_name: Traefik
     hostname: Traefik
     image: traefik:latest
-    #depends_on:
-    #- Cloudflare-Tunnel
+    depends_on:
+    - Cloudflare-Tunnel
     command: 
       # Enable API
       - --api=true
