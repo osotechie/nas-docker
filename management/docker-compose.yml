@@ -24,7 +24,7 @@ services:
   WatchTower:
     container_name: WatchTower
     hostname: watchtower
-    image: v2tec/watchtower:latest
+    image: nickfedor/watchtower:latest
     restart: always
     networks:
       management:
