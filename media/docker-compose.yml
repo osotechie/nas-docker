@@ -122,6 +122,25 @@ services:
     - traefik.http.routers.sabnzbd.middlewares=Real-IP@file, Headers@file
 
 
+  Wrapperr:
+    container_name: Wrapperr
+    hostname: Wrapperr
+    image: ghcr.io/aunefyren/wrapperr:latest
+    restart: always
+    networks:
+       media:
+    volumes:
+      - ${DOCKERDIR}/Wrapperr:/app/config
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.Wrapperr.loadbalancer.server.port=8282
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.Wrapperr.rule=Host(`wrapperr.${DOMAIN}`)
+    - traefik.http.routers.Wrapperr.entryPoints=websecure
+    - traefik.http.routers.Wrapperr.middlewares=Real-IP@file, Headers@file
+
+
   Tautulli:
     container_name: Tautulli
     hostname: tautulli
