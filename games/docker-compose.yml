@@ -69,7 +69,7 @@ services:
       - ${DOCKERDIR}/amp:/home/amp/.ampdata
     environment:
       - TZ=Pacific/Auckland # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-      - AMP_LICENCE=${AMP_LICENSE}
+      - AMP_LICENCE=${AMP_LICENCE}
       - MODULE=ADS
     labels:
     # Traefik - Service
