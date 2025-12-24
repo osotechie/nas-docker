@@ -87,7 +87,7 @@ services:
   Maintainerr:
     container_name: maintainerr
     hostname: maintainerr
-    image: ghcr.io/jorenn92/maintainerr:latest
+    image: ghcr.io/maintainerr/maintainerr:latest
     restart: always
     networks:
        media:
