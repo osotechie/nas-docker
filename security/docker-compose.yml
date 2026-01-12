@@ -29,31 +29,31 @@ services:
     - traefik.http.routers.bitwarden.tls.certresolver=cloudflare
     - traefik.http.routers.bitwarden.middlewares=Real-IP@file, Headers@file
 
-  bitwarden-lite:
-    container_name: Bitwarden-lite
-    hostname: bitwarden-lite
-    image: ghcr.io/bitwarden/lite
-    restart: always
-    volumes:
-      - ${DOCKERDIR}/bitwarden-shelfhosted/etc:/etc/bitwarden
-    networks:
-       security:
-    environment:
-      BW_DOMAIN: bitwarden-lite.${DOMAIN}
-      BW_DB_PROVIDER: sqllite
-      BW_INSTALLATION_ID: ${BITWARDEN_INSTALLATIONID}
-      BW_INSTALLATION_KEY: ${BITWARDEN_INSTALLATIONKEY}
-      globalSettings__disableUserRegistration: true
-    labels:
-    # Traefik - Service
-    - traefik.enable=true
-    - traefik.http.services.bitwarden-sh.loadbalancer.server.port=80
-    # Traefik - Router - HTTPS
-    - traefik.http.routers.bitwarden-sh.service=bitwarden-sh
-    - traefik.http.routers.bitwarden-sh.rule=Host(`bitwarden-selfhosted.${DOMAIN}`)
-    - traefik.http.routers.bitwarden-sh.entryPoints=websecure
-    - traefik.http.routers.bitwarden-sh.tls.certresolver=cloudflare
-    - traefik.http.routers.bitwarden-sh.middlewares=Real-IP@file, Headers@file
+  #bitwarden-lite:
+  #  container_name: Bitwarden-lite
+  #  hostname: bitwarden-lite
+  #  image: ghcr.io/bitwarden/lite
+  #  restart: always
+  #  volumes:
+  #    - ${DOCKERDIR}/bitwarden-lite/etc:/etc/bitwarden
+  #    - ${DOCKERDIR}/bitwarden-lite/logs:/var/log/bitwarden
+  #  networks:
+  #     security:
+  #  environment:
+  #    BW_DOMAIN: bitwarden-lite.${DOMAIN}
+  #    BW_DB_PROVIDER: sqlite
+  #    BW_INSTALLATION_ID: ${BITWARDEN_INSTALLATIONID}
+  #    BW_INSTALLATION_KEY: ${BITWARDEN_INSTALLATIONKEY}
+  #  labels:
+  #  # Traefik - Service
+  #  - traefik.enable=true
+  #  - traefik.http.services.bitwarden-lite.loadbalancer.server.port=8080
+  #  # Traefik - Router - HTTPS
+  #  - traefik.http.routers.bitwarden-lite.service=bitwarden-lite
+  #  - traefik.http.routers.bitwarden-lite.rule=Host(`bitwarden-lite.${DOMAIN}`)
+  #  - traefik.http.routers.bitwarden-lite.entryPoints=websecure
+  #  - traefik.http.routers.bitwarden-lite.tls.certresolver=cloudflare
+  #  - traefik.http.routers.bitwarden-lite.middlewares=Real-IP@file, Headers@file
 
 #Shared Networks between containers
 networks:
