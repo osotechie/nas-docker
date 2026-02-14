@@ -29,6 +29,34 @@ services:
     - traefik.http.routers.bitwarden.tls.certresolver=cloudflare
     - traefik.http.routers.bitwarden.middlewares=Real-IP@file, Headers@file
 
+  #bitwarden-lite:
+  #  container_name: Bitwarden-lite
+  #  hostname: bitwarden-lite
+  #  image: ghcr.io/bitwarden/lite
+  #  restart: always
+  #  volumes:
+  #    - ${DOCKERDIR}/bitwarden-lite/etc:/etc/bitwarden
+  #    - ${DOCKERDIR}/bitwarden-lite/logs:/var/log/bitwarden
+  #  networks:
+  #     security:
+  #  environment:
+  #    BW_DOMAIN: bitwarden-lite.${DOMAIN}
+  #    BW_DB_PROVIDER: sqlite
+  #    BW_INSTALLATION_ID: ${BITWARDEN_INSTALLATIONID}
+  #    BW_INSTALLATION_KEY: ${BITWARDEN_INSTALLATIONKEY}
+  #    globalSettings__disableUserRegistration: 'false'
+  #    adminSettings__admins: 'o@demooy.co.nz,owen@demooy.co.nz'
+  #  labels:
+  #  # Traefik - Service
+  #  - traefik.enable=true
+  #  - traefik.http.services.bitwarden-lite.loadbalancer.server.port=8080
+  #  # Traefik - Router - HTTPS
+  #  - traefik.http.routers.bitwarden-lite.service=bitwarden-lite
+  #  - traefik.http.routers.bitwarden-lite.rule=Host(`bitwarden-lite.${DOMAIN}`)
+  #  - traefik.http.routers.bitwarden-lite.entryPoints=websecure
+  #  - traefik.http.routers.bitwarden-lite.tls.certresolver=cloudflare
+  #  - traefik.http.routers.bitwarden-lite.middlewares=Real-IP@file, Headers@file
+
 #Shared Networks between containers
 networks:
   #Internal Docker Networks

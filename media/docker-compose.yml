@@ -87,7 +87,7 @@ services:
   Maintainerr:
     container_name: maintainerr
     hostname: maintainerr
-    image: ghcr.io/jorenn92/maintainerr:latest
+    image: ghcr.io/maintainerr/maintainerr:latest
     restart: always
     networks:
        media:
@@ -120,6 +120,25 @@ services:
     - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${DOMAIN}`)
     - traefik.http.routers.sabnzbd.entryPoints=websecure
     - traefik.http.routers.sabnzbd.middlewares=Real-IP@file, Headers@file
+
+
+  Wrapperr:
+    container_name: Wrapperr
+    hostname: Wrapperr
+    image: ghcr.io/aunefyren/wrapperr:latest
+    restart: always
+    networks:
+       media:
+    volumes:
+      - ${DOCKERDIR}/Wrapperr:/app/config
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.Wrapperr.loadbalancer.server.port=8282
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.Wrapperr.rule=Host(`wrapperr.${DOMAIN}`)
+    - traefik.http.routers.Wrapperr.entryPoints=websecure
+    - traefik.http.routers.Wrapperr.middlewares=Real-IP@file, Headers@file
 
 
   Tautulli:
@@ -177,14 +196,12 @@ services:
     hostname: FileBrowser
     image: filebrowser/filebrowser
     restart: always
-    user: "1001:1001"
     networks:
       media:
     volumes:
-      - ${DOCKERDIR}/FileBrowser/Srv:/srv
       - ${DOCKERDIR}/FileBrowser/Data:/data
-      - ${DOCKERDIR}/FileBrowser/Database:/database
-      - ${DOCKERDIR}/FileBrowser/Config:/config
+      - ${DOCKERDIR}/FileBrowser/Config/filebrowser.db:/filebrowser.db
+      - ${DOCKERDIR}/FileBrowser/Config/filebrowser.json:/.filebrowser.json
       # Contents to share
       - ${NAS_MEDIADIR}/CHILDREN MOVIES:/data/media/kidsmovies:ro
       - ${NAS_MEDIADIR}/MOVIES:/data/media/movies:ro

@@ -18,30 +18,30 @@ services:
     - traefik.http.routers.it-tools.middlewares=Real-IP@file, Headers@file
 
 
-  Stirling-PDF:
-    container_name: stirling-pdf
-    hostname: stirling-pdf
-    image: stirlingtools/stirling-pdf:latest
+  Bento-PDF:
+    container_name: bento-pdf
+    hostname: bento-pdf
+    image: bentopdf/bentopdf-simple:latest
     restart: always
     networks:
        misc:
-    volumes:
-      - ${DOCKERDIR}/Stirling-PDF/trainingData:/usr/share/tessdata # Required for extra OCR languages
-      - ${DOCKERDIR}/Stirling-PDF/extraConfigs:/configs
-      - ${DOCKERDIR}/Stirling-PDF/customFiles:/customFiles/
-      - ${DOCKERDIR}/Stirling-PDF/logs:/logs/
-      - ${DOCKERDIR}/Stirling-PDF/pipeline:/pipeline/
-    environment:
+    #volumes:
+      #- ${DOCKERDIR}/Stirling-PDF/trainingData:/usr/share/tessdata # Required for extra OCR languages
+      #- ${DOCKERDIR}/Stirling-PDF/extraConfigs:/configs
+      #- ${DOCKERDIR}/Stirling-PDF/customFiles:/customFiles/
+      #- ${DOCKERDIR}/Stirling-PDF/logs:/logs/
+      #- ${DOCKERDIR}/Stirling-PDF/pipeline:/pipeline/
+    #environment:
     #  - DOCKER_ENABLE_SECURITY=false
-      - LANGS=en_GB
+      #- LANGS=en_GB
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.stirling-pdf.loadbalancer.server.port=8080
+    - traefik.http.services.bento-pdf.loadbalancer.server.port=8080
     # Traefik - Router - HTTPS
-    - traefik.http.routers.stirling-pdf.rule=Host(`pdf.${DOMAIN}`)
-    - traefik.http.routers.stirling-pdf.entryPoints=websecure
-    - traefik.http.routers.stirling-pdf.middlewares=Real-IP@file, Headers@file
+    - traefik.http.routers.bento-pdf.rule=Host(`pdf.${DOMAIN}`)
+    - traefik.http.routers.bento-pdf.entryPoints=websecure
+    - traefik.http.routers.bento-pdf.middlewares=Real-IP@file, Headers@file
 
 
   ConvertX: 
