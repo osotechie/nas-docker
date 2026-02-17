@@ -21,6 +21,26 @@ services:
     - traefik.http.routers.portainer.entryPoints=websecure
     - traefik.http.routers.portainer.middlewares=Real-IP@file, Headers@file
 
+  dockhand:
+    container_name: dockhand
+    hostname: dockhand
+    image: fnsys/dockhand:latest
+    restart: always
+    networks:
+      management:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKERDIR}/dockhand:/app/data
+      - /config/stacks:/stacks
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.dockhand.loadbalancer.server.port=3000
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.dockhand.rule=Host(`docker.${DOMAIN}`)
+    - traefik.http.routers.dockhand.entryPoints=websecure
+    - traefik.http.routers.dockhand.middlewares=Real-IP@file, Headers@file
+
   WatchTower:
     container_name: WatchTower
     hostname: watchtower
