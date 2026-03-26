@@ -195,13 +195,14 @@ services:
     container_name: FileBrowser
     hostname: FileBrowser
     image: filebrowser/filebrowser
+    user: 1001:1001
     restart: always
     networks:
       media:
     volumes:
+      - ${DOCKERDIR}/FileBrowser/Config:/config
+      - ${DOCKERDIR}/FileBrowser/Database:/database
       - ${DOCKERDIR}/FileBrowser/Data:/data
-      - ${DOCKERDIR}/FileBrowser/Config/filebrowser.db:/filebrowser.db
-      - ${DOCKERDIR}/FileBrowser/Config/filebrowser.json:/.filebrowser.json
       # Contents to share
       - ${NAS_MEDIADIR}/CHILDREN MOVIES:/data/media/kidsmovies:ro
       - ${NAS_MEDIADIR}/MOVIES:/data/media/movies:ro
