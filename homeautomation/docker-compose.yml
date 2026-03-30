@@ -101,7 +101,7 @@ services:
   Frigate:
     container_name: frigate
     hostname: frigate
-    image: ghcr.io/blakeblackshear/frigate
+    image: ghcr.io/blakeblackshear/frigate:stable
     privileged: true
     restart: always
     networks:
