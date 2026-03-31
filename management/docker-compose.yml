@@ -24,7 +24,7 @@ services:
     - kuma.portainer.http.name=Portainer
     - kuma.portainer.http.url=https://portainer.${DOMAIN}
     - kuma.portainer.http.headers=${KUMA_CFHEADERS}
-    - kuma.portainer.http.parent_name=Management
+    - kuma.portainer.http.parent_name=management
 
   dockhand:
     container_name: dockhand
@@ -49,7 +49,7 @@ services:
     - kuma.dockhand.http.name=Dockhand
     - kuma.dockhand.http.url=https://docker.${DOMAIN}
     - kuma.dockhand.http.headers=${KUMA_CFHEADERS}
-    - kuma.dockhand.http.parent_name=Management
+    - kuma.dockhand.http.parent_name=management
 
   WatchTower:
     container_name: WatchTower
@@ -86,7 +86,7 @@ services:
     - kuma.dozzle.http.name=Dozzle
     - kuma.dozzle.http.url=https://dozzle.${DOMAIN}
     - kuma.dozzle.http.headers=${KUMA_CFHEADERS}
-    - kuma.dozzle.http.parent_name=Management
+    - kuma.dozzle.http.parent_name=management
 
 
 #Shared Networks between containers

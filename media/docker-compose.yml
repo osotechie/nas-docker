@@ -26,7 +26,7 @@ services:
     # AutoKuma - Uptime Kuma Monitor
     - kuma.overseerr.http.name=Plex
     - kuma.overseerr.http.url=http://10.1.11.100:32400/identity
-    - kuma.overseerr.http.parent_name=Media
+    - kuma.overseerr.http.parent_name=media
 
 
   overseerr:
@@ -50,7 +50,7 @@ services:
     - kuma.overseerr.http.name=Overseerr
     - kuma.overseerr.http.url=https://overseerr.${DOMAIN}
     - kuma.overseerr.http.headers=${KUMA_CFHEADERS}
-    - kuma.overseerr.http.parent_name=Media
+    - kuma.overseerr.http.parent_name=media
 
   Sonarr:
     container_name: Sonarr
@@ -75,7 +75,7 @@ services:
     - kuma.sonarr.http.name=Sonarr
     - kuma.sonarr.http.url=https://sonarr.${DOMAIN}
     - kuma.sonarr.http.headers=${KUMA_CFHEADERS}
-    - kuma.sonarr.http.parent_name=Media
+    - kuma.sonarr.http.parent_name=media
 
   Radarr:
     container_name: Radarr
@@ -101,7 +101,7 @@ services:
     - kuma.radarr.http.name=Radarr
     - kuma.radarr.http.url=https://radarr.${DOMAIN}
     - kuma.radarr.http.headers=${KUMA_CFHEADERS}
-    - kuma.radarr.http.parent_name=Media
+    - kuma.radarr.http.parent_name=media
 
   Maintainerr:
     container_name: maintainerr
@@ -124,7 +124,7 @@ services:
     - kuma.maintainerr.http.name=Maintainerr
     - kuma.maintainerr.http.url=https://maintainerr.${DOMAIN}
     - kuma.maintainerr.http.headers=${KUMA_CFHEADERS}
-    - kuma.maintainerr.http.parent_name=Media
+    - kuma.maintainerr.http.parent_name=media
 
   SABnzbd:
     container_name: SABnzbd
@@ -148,7 +148,7 @@ services:
     - kuma.sabnzbd.http.name=SABnzbd
     - kuma.sabnzbd.http.url=https://sabnzbd.${DOMAIN}
     - kuma.sabnzbd.http.headers=${KUMA_CFHEADERS}
-    - kuma.sabnzbd.http.parent_name=Media
+    - kuma.sabnzbd.http.parent_name=media
 
 
   Wrapperr:
@@ -172,7 +172,7 @@ services:
     - kuma.wrapperr.http.name=Wrapperr
     - kuma.wrapperr.http.url=https://wrapperr.${DOMAIN}
     - kuma.wrapperr.http.headers=${KUMA_CFHEADERS}
-    - kuma.wrapperr.http.parent_name=Media
+    - kuma.wrapperr.http.parent_name=media
 
 
   Tautulli:
@@ -196,7 +196,7 @@ services:
     - kuma.tautulli.http.name=Tautulli
     - kuma.tautulli.http.url=https://tautulli.${DOMAIN}
     - kuma.tautulli.http.headers=${KUMA_CFHEADERS}
-    - kuma.tautulli.http.parent_name=Media
+    - kuma.tautulli.http.parent_name=media
 
 
   Tdarr:
@@ -233,7 +233,7 @@ services:
     - kuma.tdarr.http.name=Tdarr
     - kuma.tdarr.http.url=https://tdarr.${DOMAIN}
     - kuma.tdarr.http.headers=${KUMA_CFHEADERS}
-    - kuma.tdarr.http.parent_name=Media
+    - kuma.tdarr.http.parent_name=media
 
   FileBrowser:
     container_name: FileBrowser
@@ -265,7 +265,7 @@ services:
     - kuma.filebrowser.http.name=FileBrowser
     - kuma.filebrowser.http.url=https://media.${DOMAIN}
     - kuma.filebrowser.http.headers=${KUMA_CFHEADERS}
-    - kuma.filebrowser.http.parent_name=Media
+    - kuma.filebrowser.http.parent_name=media
 
 
 #Shared Networks between containers
