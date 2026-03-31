@@ -37,7 +37,7 @@ services:
     - kuma.homeassistant.http.name=Home Assistant
     - kuma.homeassistant.http.url=https://homeassistant.${DOMAIN}
     - kuma.homeassistant.http.headers=${KUMA_CFHEADERS}
-    - kuma.homeassistant.http.parent_name=Home Automation
+    - kuma.homeassistant.http.parent_name=homeautomation
  
 
   NodeRed:
@@ -70,7 +70,7 @@ services:
     - kuma.nodered.http.name=Node-RED
     - kuma.nodered.http.url=https://nodered.${DOMAIN}
     - kuma.nodered.http.headers=${KUMA_CFHEADERS}    
-    - kuma.nodered.http.parent_name=Home Automation
+    - kuma.nodered.http.parent_name=homeautomation
 
 
   Mosquitto:
@@ -111,7 +111,7 @@ services:
     - kuma.mqttexplorer.http.name=MQTT Explorer
     - kuma.mqttexplorer.http.url=https://mqttexplorer.${DOMAIN}
     - kuma.mqttexplorer.http.headers=${KUMA_CFHEADERS}
-    - kuma.mqttexplorer.http.parent_name=Home Automation
+    - kuma.mqttexplorer.http.parent_name=homeautomation
 
   Frigate:
     container_name: frigate
@@ -148,7 +148,7 @@ services:
     - kuma.frigate.http.name=Frigate
     - kuma.frigate.http.url=https://frigate.${DOMAIN}
     - kuma.frigate.http.headers=${KUMA_CFHEADERS}
-    - kuma.frigate.http.parent_name=Home Automation
+    - kuma.frigate.http.parent_name=homeautomation
 
 
 #Shared Networks between containers

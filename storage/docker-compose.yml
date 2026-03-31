@@ -55,7 +55,7 @@ services:
     - kuma.scrutiny.http.name=Scrutiny
     - kuma.scrutiny.http.url=https://scrutiny.${DOMAIN}
     - kuma.scrutiny.http.headers=${KUMA_CFHEADERS}
-    - kuma.scrutiny.http.parent_name=Storage
+    - kuma.scrutiny.http.parent_name=storage
 
   Crashplan:
     container_name: crashplan
@@ -81,7 +81,7 @@ services:
     - kuma.crashplan.http.name=CrashPlan
     - kuma.crashplan.http.url=https://crashplan.${DOMAIN}
     - kuma.crashplan.http.headers=${KUMA_CFHEADERS}
-    - kuma.crashplan.http.parent_name=Storage
+    - kuma.crashplan.http.parent_name=storage
 
 #Shared Networks between containers
 networks:

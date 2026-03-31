@@ -35,7 +35,7 @@ services:
     - kuma.glances.http.name=Glances
     - kuma.glances.http.url=https://glances.${DOMAIN}
     - kuma.glances.http.headers=${KUMA_CFHEADERS}
-    - kuma.glances.http.parent_name=Monitor
+    - kuma.glances.http.parent_name=monitor
 
 
   netdata:
@@ -71,7 +71,7 @@ services:
     - kuma.netdata.http.name=Netdata
     - kuma.netdata.http.url=https://netdata.${DOMAIN}
     - kuma.netdata.http.headers=${KUMA_CFHEADERS}
-    - kuma.netdata.http.parent_name=Monitor
+    - kuma.netdata.http.parent_name=monitor
 
 
   autokuma:
@@ -88,6 +88,18 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${DOCKERDIR}/autokuma/data:/data
+    labels:
+    # AutoKuma - Parent Group Definitions
+    - kuma.games.group.name=Games
+    - kuma.homeautomation.group.name=Home Automation
+    - kuma.management.group.name=Management
+    - kuma.media.group.name=Media
+    - kuma.misc.group.name=Misc
+    - kuma.monitor.group.name=Monitoring
+    - kuma.network.group.name=Network
+    - kuma.proxy.group.name=Proxy
+    - kuma.security.group.name=Security
+    - kuma.storage.group.name=Storage
 
 
 #Shared Networks between containers

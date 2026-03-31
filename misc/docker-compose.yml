@@ -20,7 +20,7 @@ services:
     - kuma.ittools.http.name=IT Tools
     - kuma.ittools.http.url=https://tools.${DOMAIN}
     - kuma.ittools.http.headers=${KUMA_CFHEADERS}
-    - kuma.ittools.http.parent_name=Misc
+    - kuma.ittools.http.parent_name=misc
 
 
   Bento-PDF:
@@ -51,7 +51,7 @@ services:
     - kuma.bentopdf.http.name=Bento PDF
     - kuma.bentopdf.http.url=https://pdf.${DOMAIN}
     - kuma.bentopdf.http.headers=${KUMA_CFHEADERS}
-    - kuma.bentopdf.http.parent_name=Misc
+    - kuma.bentopdf.http.parent_name=misc
 
 
   ConvertX: 
@@ -75,7 +75,7 @@ services:
     - kuma.convertx.http.name=ConvertX
     - kuma.convertx.http.url=https://convert.${DOMAIN}
     - kuma.convertx.http.headers=${KUMA_CFHEADERS}
-    - kuma.convertx.http.parent_name=Misc
+    - kuma.convertx.http.parent_name=misc
 
     
 #Shared Networks between containers

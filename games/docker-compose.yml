@@ -83,7 +83,7 @@ services:
     - kuma.amp.http.name=AMP Game Server
     - kuma.amp.http.url=https://amp.${DOMAIN}
     - kuma.amp.http.headers=${KUMA_CFHEADERS}
-    - kuma.amp.http.parent_name=Games
+    - kuma.amp.http.parent_name=games
 
   playit:
     container_name: playit

@@ -82,7 +82,7 @@ services:
     - kuma.traefik.http.name=Traefik Dashboard
     - kuma.traefik.http.url=https://traefik.${DOMAIN}
     - kuma.traefik.http.headers=${KUMA_CFHEADERS}
-    - kuma.traefik.http.parent_name=Proxy
+    - kuma.traefik.http.parent_name=proxy
 
 
   Cloudflare-Companion:
@@ -141,7 +141,7 @@ services:
     - kuma.whoami.http.name=Whoami
     - kuma.whoami.http.url=https://whoami.${DOMAIN}
     - kuma.whoami.http.headers=${KUMA_CFHEADERS}
-    - kuma.whoami.http.parent_name=Proxy
+    - kuma.whoami.http.parent_name=proxy
 
 #Shared Networks between containers
 networks:

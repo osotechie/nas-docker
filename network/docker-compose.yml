@@ -27,7 +27,7 @@ services:
     - kuma.adguard.http.name=AdGuard Home
     - kuma.adguard.http.url=https://adguard.${DOMAIN}
     - kuma.adguard.http.headers=${KUMA_CFHEADERS}
-    - kuma.adguard.http.parent_name=Network
+    - kuma.adguard.http.parent_name=network
 
   AdguardHome-sync:
     container_name: AdguardHome-Sync
@@ -53,7 +53,7 @@ services:
     - kuma.adguardsync.http.name=AdGuard Home Sync
     - kuma.adguardsync.http.url=https://adguard-sync.${DOMAIN}
     - kuma.adguardsync.http.headers=${KUMA_CFHEADERS}
-    - kuma.adguardsync.http.parent_name=Network
+    - kuma.adguardsync.http.parent_name=network
 
   speedtest:
     container_name: speedtest
@@ -75,7 +75,7 @@ services:
     - kuma.speedtest.http.name=Speedtest
     - kuma.speedtest.http.url=https://speedtest.${DOMAIN}
     - kuma.speedtest.http.headers=${KUMA_CFHEADERS}
-    - kuma.speedtest.http.parent_name=Network
+    - kuma.speedtest.http.parent_name=network
     
 
 #Shared Networks between containers
