@@ -33,6 +33,11 @@ services:
     - traefik.http.routers.homeassistant.rule=Host(`homeassistant.${DOMAIN}`)
     - traefik.http.routers.homeassistant.entryPoints=websecure
     - traefik.http.routers.homeassistant.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.homeassistant.http.name=Home Assistant
+    - kuma.homeassistant.http.url=https://homeassistant.${DOMAIN}
+    - kuma.homeassistant.http.headers=${KUMA_CFHEADERS}
+    - kuma.homeassistant.http.parent_name=Home Automation
  
 
   NodeRed:
@@ -61,6 +66,11 @@ services:
     - traefik.http.routers.nodered.rule=Host(`nodered.${DOMAIN}`)
     - traefik.http.routers.nodered.entryPoints=websecure
     - traefik.http.routers.nodered.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.nodered.http.name=Node-RED
+    - kuma.nodered.http.url=https://nodered.${DOMAIN}
+    - kuma.nodered.http.headers=${KUMA_CFHEADERS}    
+    - kuma.nodered.http.parent_name=Home Automation
 
 
   Mosquitto:
@@ -97,6 +107,11 @@ services:
     - traefik.http.routers.mqtt-explorer.rule=Host(`mqttexplorer.${DOMAIN}`)
     - traefik.http.routers.mqtt-explorer.entryPoints=websecure
     - traefik.http.routers.mqtt-explorer.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.mqttexplorer.http.name=MQTT Explorer
+    - kuma.mqttexplorer.http.url=https://mqttexplorer.${DOMAIN}
+    - kuma.mqttexplorer.http.headers=${KUMA_CFHEADERS}
+    - kuma.mqttexplorer.http.parent_name=Home Automation
 
   Frigate:
     container_name: frigate
@@ -129,6 +144,11 @@ services:
     - traefik.http.routers.frigate.rule=Host(`frigate.${DOMAIN}`)
     - traefik.http.routers.frigate.entryPoints=websecure
     - traefik.http.routers.frigate.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.frigate.http.name=Frigate
+    - kuma.frigate.http.url=https://frigate.${DOMAIN}
+    - kuma.frigate.http.headers=${KUMA_CFHEADERS}
+    - kuma.frigate.http.parent_name=Home Automation
 
 
 #Shared Networks between containers

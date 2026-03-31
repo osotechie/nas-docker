@@ -28,6 +28,11 @@ services:
     - traefik.http.routers.bitwarden.entryPoints=websecure
     - traefik.http.routers.bitwarden.tls.certresolver=cloudflare
     - traefik.http.routers.bitwarden.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.bitwarden.http.name=Vaultwarden
+    - kuma.bitwarden.http.url=https://bitwarden.${DOMAIN}
+    - kuma.bitwarden.http.headers=${KUMA_CFHEADERS}
+    - kuma.bitwarden.http.parent_name=Security
 
   #bitwarden-lite:
   #  container_name: Bitwarden-lite

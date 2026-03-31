@@ -51,6 +51,11 @@ services:
     - traefik.http.routers.scrutiny.rule=Host(`scrutiny.${DOMAIN}`)
     - traefik.http.routers.scrutiny.entryPoints=websecure
     - traefik.http.routers.scrutiny.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.scrutiny.http.name=Scrutiny
+    - kuma.scrutiny.http.url=https://scrutiny.${DOMAIN}
+    - kuma.scrutiny.http.headers=${KUMA_CFHEADERS}
+    - kuma.scrutiny.http.parent_name=Storage
 
   Crashplan:
     container_name: crashplan
@@ -72,6 +77,11 @@ services:
     - traefik.http.routers.crashplan.rule=Host(`crashplan.${DOMAIN}`)
     - traefik.http.routers.crashplan.entryPoints=websecure
     - traefik.http.routers.crashplan.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.crashplan.http.name=CrashPlan
+    - kuma.crashplan.http.url=https://crashplan.${DOMAIN}
+    - kuma.crashplan.http.headers=${KUMA_CFHEADERS}
+    - kuma.crashplan.http.parent_name=Storage
 
 #Shared Networks between containers
 networks:

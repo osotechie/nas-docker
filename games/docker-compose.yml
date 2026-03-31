@@ -79,6 +79,11 @@ services:
     - traefik.http.routers.amp.rule=Host(`amp.${DOMAIN}`)
     - traefik.http.routers.amp.entryPoints=websecure
     - traefik.http.routers.amp.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.amp.http.name=AMP Game Server
+    - kuma.amp.http.url=https://amp.${DOMAIN}
+    - kuma.amp.http.headers=${KUMA_CFHEADERS}
+    - kuma.amp.http.parent_name=Games
 
   playit:
     container_name: playit

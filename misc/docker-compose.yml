@@ -16,6 +16,11 @@ services:
     - traefik.http.routers.it-tools.entryPoints=websecure
     #- traefik.http.routers.glances.tls.certresolver=cloudflare
     - traefik.http.routers.it-tools.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.ittools.http.name=IT Tools
+    - kuma.ittools.http.url=https://tools.${DOMAIN}
+    - kuma.ittools.http.headers=${KUMA_CFHEADERS}
+    - kuma.ittools.http.parent_name=Misc
 
 
   Bento-PDF:
@@ -42,6 +47,11 @@ services:
     - traefik.http.routers.bento-pdf.rule=Host(`pdf.${DOMAIN}`)
     - traefik.http.routers.bento-pdf.entryPoints=websecure
     - traefik.http.routers.bento-pdf.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.bentopdf.http.name=Bento PDF
+    - kuma.bentopdf.http.url=https://pdf.${DOMAIN}
+    - kuma.bentopdf.http.headers=${KUMA_CFHEADERS}
+    - kuma.bentopdf.http.parent_name=Misc
 
 
   ConvertX: 
@@ -61,6 +71,11 @@ services:
     - traefik.http.routers.convertx.rule=Host(`convert.${DOMAIN}`)
     - traefik.http.routers.convertx.entryPoints=websecure
     - traefik.http.routers.convertx.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.convertx.http.name=ConvertX
+    - kuma.convertx.http.url=https://convert.${DOMAIN}
+    - kuma.convertx.http.headers=${KUMA_CFHEADERS}
+    - kuma.convertx.http.parent_name=Misc
 
     
 #Shared Networks between containers

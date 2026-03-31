@@ -20,6 +20,11 @@ services:
     - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)
     - traefik.http.routers.portainer.entryPoints=websecure
     - traefik.http.routers.portainer.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.portainer.http.name=Portainer
+    - kuma.portainer.http.url=https://portainer.${DOMAIN}
+    - kuma.portainer.http.headers=${KUMA_CFHEADERS}
+    - kuma.portainer.http.parent_name=Management
 
   dockhand:
     container_name: dockhand
@@ -40,6 +45,11 @@ services:
     - traefik.http.routers.dockhand.rule=Host(`docker.${DOMAIN}`)
     - traefik.http.routers.dockhand.entryPoints=websecure
     - traefik.http.routers.dockhand.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.dockhand.http.name=Dockhand
+    - kuma.dockhand.http.url=https://docker.${DOMAIN}
+    - kuma.dockhand.http.headers=${KUMA_CFHEADERS}
+    - kuma.dockhand.http.parent_name=Management
 
   WatchTower:
     container_name: WatchTower
@@ -72,6 +82,11 @@ services:
     - traefik.http.routers.dozzle.rule=Host(`dozzle.${DOMAIN}`)
     - traefik.http.routers.dozzle.entryPoints=websecure
     - traefik.http.routers.dozzle.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.dozzle.http.name=Dozzle
+    - kuma.dozzle.http.url=https://dozzle.${DOMAIN}
+    - kuma.dozzle.http.headers=${KUMA_CFHEADERS}
+    - kuma.dozzle.http.parent_name=Management
 
 
 #Shared Networks between containers
