@@ -82,9 +82,9 @@ services:
     networks:
       monitor:
     environment:
-      - AUTOKUMA__KUMA_URL=${KUMA_URL}
-      - AUTOKUMA__KUMA_USERNAME=${KUMA_USERNAME}
-      - AUTOKUMA__KUMA_PASSWORD=${KUMA_PASSWORD}
+      - AUTOKUMA__KUMA__URL=${KUMA_URL}
+      - AUTOKUMA__KUMA__USERNAME=${KUMA_USERNAME}
+      - AUTOKUMA__KUMA__PASSWORD=${KUMA_PASSWORD}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${DOCKERDIR}/autokuma/data:/data
