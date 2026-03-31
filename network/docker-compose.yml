@@ -23,6 +23,11 @@ services:
     - traefik.http.routers.adguard-doh.rule=Host(`doh.${DOMAIN}`) &&  Path(`/dns-query`)
     - traefik.http.routers.adguard-doh.entryPoints=websecure
     - traefik.http.routers.adguard-doh.middlewares=Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.adguard.http.name=AdGuard Home
+    - kuma.adguard.http.url=https://adguard.${DOMAIN}
+    - kuma.adguard.http.headers=${KUMA_CFHEADERS}
+    - kuma.adguard.http.parent_name=Network
 
   AdguardHome-sync:
     container_name: AdguardHome-Sync
@@ -44,6 +49,11 @@ services:
     - traefik.http.routers.adguardhome-sync.rule=Host(`adguard-sync.${DOMAIN}`)
     - traefik.http.routers.speeadguardhome-syncdtest.entryPoints=websecure
     - traefik.http.routers.adguardhome-sync.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.adguardsync.http.name=AdGuard Home Sync
+    - kuma.adguardsync.http.url=https://adguard-sync.${DOMAIN}
+    - kuma.adguardsync.http.headers=${KUMA_CFHEADERS}
+    - kuma.adguardsync.http.parent_name=Network
 
   speedtest:
     container_name: speedtest
@@ -61,6 +71,11 @@ services:
     - traefik.http.routers.speedtest.rule=Host(`speedtest.${DOMAIN}`)
     - traefik.http.routers.speedtest.entryPoints=websecure
     - traefik.http.routers.speedtest.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.speedtest.http.name=Speedtest
+    - kuma.speedtest.http.url=https://speedtest.${DOMAIN}
+    - kuma.speedtest.http.headers=${KUMA_CFHEADERS}
+    - kuma.speedtest.http.parent_name=Network
     
 
 #Shared Networks between containers

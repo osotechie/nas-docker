@@ -78,6 +78,11 @@ services:
     - traefik.http.routers.api.entryPoints=websecure
     #- traefik.http.routers.api.tls.certresolver=cloudflare
     - traefik.http.routers.api.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.traefik.http.name=Traefik Dashboard
+    - kuma.traefik.http.url=https://traefik.${DOMAIN}
+    - kuma.traefik.http.headers=${KUMA_CFHEADERS}
+    - kuma.traefik.http.parent_name=Proxy
 
 
   Cloudflare-Companion:
@@ -132,6 +137,11 @@ services:
     - traefik.http.routers.whoami.entryPoints=websecure
     #- traefik.http.routers.whoami.tls.certresolver=cloudflare
     - traefik.http.routers.whoami.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.whoami.http.name=Whoami
+    - kuma.whoami.http.url=https://whoami.${DOMAIN}
+    - kuma.whoami.http.headers=${KUMA_CFHEADERS}
+    - kuma.whoami.http.parent_name=Proxy
 
 #Shared Networks between containers
 networks:
