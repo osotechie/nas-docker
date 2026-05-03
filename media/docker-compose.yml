@@ -235,6 +235,37 @@ services:
     - kuma.tdarr.http.headers=${KUMA_CFHEADERS}
     - kuma.tdarr.http.parent_name=media
 
+  music-assistant-server:
+    container_name: MusicAssistant
+    hostname: musicassistant
+    image: ghcr.io/music-assistant/server:latest
+    restart: unless-stopped
+    networks:
+       IoT:
+        ipv4_address: 10.1.11.101
+    volumes:
+      - ${DOCKERDIR}/musicassistant/data:/data/
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      - LOG_LEVEL=info
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.musicassistant.loadbalancer.server.port=8095
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.musicassistant.rule=Host(`musicassistant.${DOMAIN}`)
+    - traefik.http.routers.musicassistant.entryPoints=websecure
+    - traefik.http.routers.musicassistant.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.filebmusicassistantrowser.http.name=musicassistant
+    - kuma.musicassistant.http.url=https://musicassistant.${DOMAIN}
+    - kuma.musicassistant.http.headers=${KUMA_CFHEADERS}
+    - kuma.musicassistant.http.parent_name=media
+
   FileBrowser:
     container_name: FileBrowser
     hostname: FileBrowser
