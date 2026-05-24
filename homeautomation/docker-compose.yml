@@ -151,6 +151,33 @@ services:
     - kuma.frigate.http.parent_name=homeautomation
 
 
+  Predbat:
+    container_name: predbat
+    hostname: predbat
+    image: nipar44/predbat_addon:latest
+    privileged: true
+    restart: always
+    networks:
+       IoT:
+        ipv4_address: 10.1.11.18
+    volumes:
+      - ${DOCKERDIR}/predbat/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+     # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.predbat.loadbalancer.server.port=5052
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.predbat.rule=Host(`predbat.${DOMAIN}`)
+    - traefik.http.routers.predbat.entryPoints=websecure
+    - traefik.http.routers.predbat.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.predbat.http.name=Predbat
+    - kuma.predbat.http.url=https://predbat.${DOMAIN}
+    - kuma.predbat.http.headers=${KUMA_CFHEADERS}
+    - kuma.predbat.http.parent_name=homeautomation
+
+
 #Shared Networks between containers
 networks:
   #Internal Docker Networks
