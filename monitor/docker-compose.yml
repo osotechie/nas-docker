@@ -3,7 +3,7 @@ services:
   Glances:
     container_name: Glances
     hostname: glances
-    image: nicolargo/glances:3.2.4.2
+    image: nicolargo/glances:latest-full
     restart: always
     networks:
        monitor:
@@ -21,6 +21,7 @@ services:
       - /mnt/array/disk4:/mnt/array/disk4:ro
       - /mnt/array/parity1:/mnt/array/parity1:ro      
       - /mnt/storage:/mnt/storage:ro
+      - /sys:/sys:ro
     environment:
     - GLANCES_OPT=-w
     labels:
