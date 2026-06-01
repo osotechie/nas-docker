@@ -29,28 +29,28 @@ services:
     - kuma.overseerr.http.parent_name=media
 
 
-  overseerr:
-    container_name: Overseerr
-    hostname: overseerr
-    image: sctx/overseerr:latest
+  seerr:
+    container_name: Seerr
+    hostname: seerr
+    image: ghcr.io/seerr-team/seerr:latest
     restart: always
     networks:
        media:
     volumes:
-      - ${DOCKERDIR}/overseerr:/app/config
+      - ${DOCKERDIR}/seerr:/app/config
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.overseerr.loadbalancer.server.port=5055
+    - traefik.http.services.seerr.loadbalancer.server.port=5055
     # Traefik - Router - HTTPS
-    - "traefik.http.routers.overseerr.rule=Host(`overseerr.${DOMAIN}`) || Host(`ombi.${DOMAIN}`)"
-    - traefik.http.routers.overseerr.entryPoints=websecure
-    - traefik.http.routers.overseerr.middlewares=Real-IP@file, Headers@file
+    - "traefik.http.routers.seerr.rule=Host(`seerr.${DOMAIN}`) || Host(`overseerr.${DOMAIN}`) || Host(`ombi.${DOMAIN}`)"
+    - traefik.http.routers.seerr.entryPoints=websecure
+    - traefik.http.routers.seerr.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
-    - kuma.overseerr.http.name=Overseerr
-    - kuma.overseerr.http.url=https://overseerr.${DOMAIN}
-    - kuma.overseerr.http.headers=${KUMA_CFHEADERS}
-    - kuma.overseerr.http.parent_name=media
+    - kuma.seerr.http.name=seerr
+    - kuma.seerr.http.url=https://seerr.${DOMAIN}
+    - kuma.seerr.http.headers=${KUMA_CFHEADERS}
+    - kuma.seerr.http.parent_name=media
 
   Sonarr:
     container_name: Sonarr
