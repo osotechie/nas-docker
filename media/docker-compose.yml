@@ -43,7 +43,8 @@ services:
     - traefik.enable=true
     - traefik.http.services.seerr.loadbalancer.server.port=5055
     # Traefik - Router - HTTPS
-    - "traefik.http.routers.seerr.rule=Host(`seerr.${DOMAIN}`) || Host(`overseerr.${DOMAIN}`) || Host(`ombi.${DOMAIN}`)"
+    - "traefik.http.routers.seerr.rule=Host(`seerr.${DOMAIN}`) || Host(`overseerr.${DOMAIN}`) || Host(`ombi.${DOMAIN}`)"    
+    #- "traefik.http.routers.seerr.rule=Host(`seerr.${DOMAIN}`) || Host(`overseerr.${DOMAIN}`) || Host(`ombi.${DOMAIN}`)"
     - traefik.http.routers.seerr.entryPoints=websecure
     - traefik.http.routers.seerr.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
