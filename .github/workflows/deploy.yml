@@ -71,7 +71,7 @@ jobs:
       # Add route to NAS over Wireguard connection 
       - name: Add Routes
         run: |
-          sudo ip route add ${{ secrets.NAS_IP }} via 192.168.200.254 || true
+          sudo ip route add ${{ secrets.NAS_IP }} dev wg0 || true
           ip route show
           ping ${{ secrets.NAS_IP }} -c 5
 
@@ -92,15 +92,22 @@ jobs:
         run: |
           ssh-keyscan -t rsa ${{ secrets.NAS_IP }} >> ~/.ssh/known_hosts
 
-      # FIX - Add ssh config for Docker
-      # =================================
+      # STEP - Configure ssh  for Docker
+      # ================================
       # Add the following ssh configs as per docker suggestion https://docs.docker.com/engine/security/protect-access/#ssh-tips          
-      - name: FIX - Add ssh config for Docker
+      - name: Configure SSH
         run: |
-          set -x
-          echo ControlMaster     auto >> ~/.ssh/config
-          echo ControlPath       ~/.ssh/control-%C >> ~/.ssh/config
-          echo ControlPersist    yes >> ~/.ssh/config
+          {
+            echo "Host *"
+            echo "  ServerAliveInterval 30"
+            echo "  ServerAliveCountMax 10"
+            echo "  TCPKeepAlive yes"
+            echo "  ConnectTimeout 30"
+            echo "  ControlMaster auto"
+            echo "  ControlPath ~/.ssh/control-%C"
+            echo "  ControlPersist 10m"
+          } >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       # STEP - Connect to NAS Docker
       # ============================
