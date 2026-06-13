@@ -1,0 +1,22 @@
+# Editor/IDE per-machine settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local WireGuard / SSH artifacts (never commit)
+wg0.conf
+*.pem
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Pester scratch (from the old broken validation test)
+tmp.dockercompose.log
