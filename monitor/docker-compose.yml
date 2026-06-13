@@ -91,6 +91,7 @@ services:
       - ${DOCKERDIR}/autokuma/data:/data
     labels:
     # AutoKuma - Parent Group Definitions
+    - kuma.ai.group.name=AI
     - kuma.games.group.name=Games
     - kuma.homeautomation.group.name=Home Automation
     - kuma.management.group.name=Management
