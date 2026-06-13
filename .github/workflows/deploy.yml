@@ -120,17 +120,28 @@ jobs:
 
       # STEP - Deploy Stacks
       # ====================
-      # Deploy docker stacks locally  
+      # Deploy docker stacks locally
       - name: Deploy Docker Stacks
         run: |
+          set -eo pipefail
+          failed=()
           for dir in */; do
-            if [ -f "${dir}docker-compose.yml" ]; then
-              cd "$dir"
-              echo "Deploying ${PWD##*/} stack"
-              docker compose up -d
-              cd ..
+            [ -f "${dir}docker-compose.yml" ] || continue
+            stack="${dir%/}"
+            echo "::group::Deploying ${stack}"
+            if ( cd "$dir" && docker compose up -d ); then
+              echo "::endgroup::"
+            else
+              echo "::endgroup::"
+              echo "::error title=Stack deploy failed::${stack} failed to deploy"
+              failed+=("$stack")
             fi
           done
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "::error::${#failed[@]} stack(s) failed: ${failed[*]}"
+            exit 1
+          fi
+          echo "All stacks deployed successfully"
 
       #STEP - Copy Content locally
       #===========================
