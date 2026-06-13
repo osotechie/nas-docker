@@ -25,7 +25,7 @@ jobs:
     
     steps:
    
-      # STEP - Check-out Rep
+      # STEP - Check-out Repo
       # ====================
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check-out Repo
@@ -38,12 +38,9 @@ jobs:
         uses: zyborg/pester-tests-report@v1
         with:
           include_paths: .github/workflows/tests
-          #exclude_paths:
-          #exclude_tags: skip_ci
           tests_fail_step: true
           report_name: Docker Stacks Validation
           report_title: Docker Stacks Validation
-          result_value: Passed
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # STEP - Microsoft Security DevOps
