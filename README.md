@@ -56,7 +56,7 @@ DOCKERDIR=/docker/${COMPOSE_PROJECT_NAME}
 DOMAIN=#{DOMAIN}#
 
 #Stack Specific Variables
-MYSECRET: #{MYSECRET}#
+MYSECRET=#{MYSECRET}#
 
 ```
 > [!TIP]
@@ -84,9 +84,9 @@ services:
     - traefik.enable=true
     - traefik.http.services.{containername}.loadbalancer.server.port={port}
     # Traefik - Router - HTTPS
-    - traefik.http.routers.{containername}.rule=Host(`autogen.${DOMAIN}`)
+    - traefik.http.routers.{containername}.rule=Host(`{containername}.${DOMAIN}`)
     - traefik.http.routers.{containername}.entryPoints=websecure
-    - traefik.http.routers.autogen.middlewares=Real-IP@file, Headers@file
+    - traefik.http.routers.{containername}.middlewares=Real-IP@file, Headers@file
 
 #Shared Networks between containers
 networks:

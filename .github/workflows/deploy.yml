@@ -29,13 +29,13 @@ jobs:
       # ====================
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check-out Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # STEP - Connect to Azure
       # =======================
       # This step is used to connect to Azure to allow reading of Azure KeyVault in later step
       - name: Connect to Azure
-        uses: azure/login@v2
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
         with:
           creds: ${{ secrets.AZURE_SPN_CREDENTIALS }}
 
@@ -43,7 +43,7 @@ jobs:
       # =================================
       # Get Secrets from Azure KeyVault and store them as env variables as secrets for use later   
       - name: Get Azure KeyVault Secrets
-        uses: copdips/get-azure-keyvault-secrets-action@v1
+        uses: copdips/get-azure-keyvault-secrets-action@b823bc9a2bc24c45a58ba09dc234cf4be05f38d7 # v1
         with:
           keyvault: ${{ secrets.AZURE_KEYVAULT_NAME }}
           
@@ -51,7 +51,7 @@ jobs:
       # ===================================
       # Replaces tokens (e.g. #{TOKEN}#) in files with the matching environment variable of the same token name           
       - name: Replace tokens in .env files
-        uses: cschleiden/replace-tokens@v1
+        uses: cschleiden/replace-tokens@63252851d87eb5cb853019ba8538b5c51813779d # v1
         with:
           files: '["**/.env"]'
 
@@ -60,8 +60,8 @@ jobs:
       # Install and connect to Wireguard
       - name: Connect to Wireguard
         run: |
-          sudo apt install resolvconf
-          sudo apt install wireguard
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends resolvconf wireguard
           echo "${{ secrets.WG_CONFIG_FILE }}" > wg0.conf
           sudo chmod 600 wg0.conf
           sudo wg-quick up ./wg0.conf
@@ -77,20 +77,19 @@ jobs:
 
        # STEP - Add SSH Keys
       # ====================
-      # Add SSH Key used to connect to NAS
+      # Add SSH Key used to connect to NAS, and pin the NAS's host keys
+      # so we refuse to talk to anything else (replaces the previous
+      # trust-on-first-use ssh-keyscan step, which would silently accept
+      # whatever host key the network handed us each run).
+      # NOTE: If the NAS is ever rebuilt and its /etc/ssh/ssh_host_* keys
+      # regenerated, update the NAS_HOST_KEY secret (environment 'nas')
+      # with the new fingerprints or this step will refuse to connect.
       - name: Add SSH Key
-        uses: shimataro/ssh-key-action@v2
+        uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3 # v2.8.1
         with:
           # SSH private key
           key: ${{secrets.SSH_PRIVATE_KEY}}
-          known_hosts: 'placeholder'
-
-      # STEP - Setup SSH known_host entry
-      # =================================
-      # Add NAS SSH host key to known_hosts file
-      - name: Add SSH known_host entry
-        run: |
-          ssh-keyscan -t rsa ${{ secrets.NAS_IP }} >> ~/.ssh/known_hosts
+          known_hosts: ${{ secrets.NAS_HOST_KEY }}
 
       # STEP - Configure ssh  for Docker
       # ================================
@@ -120,26 +119,45 @@ jobs:
 
       # STEP - Deploy Stacks
       # ====================
-      # Deploy docker stacks locally  
+      # Deploy docker stacks locally
       - name: Deploy Docker Stacks
         run: |
+          set -eo pipefail
+          failed=()
           for dir in */; do
-            if [ -f "${dir}docker-compose.yml" ]; then
-              cd "$dir"
-              echo "Deploying ${PWD##*/} stack"
-              docker compose up -d
-              cd ..
+            [ -f "${dir}docker-compose.yml" ] || continue
+            stack="${dir%/}"
+            echo "::group::Deploying ${stack}"
+            if ( cd "$dir" && docker compose up -d ); then
+              echo "::endgroup::"
+            else
+              echo "::endgroup::"
+              echo "::error title=Stack deploy failed::${stack} failed to deploy"
+              failed+=("$stack")
             fi
           done
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "::error::${#failed[@]} stack(s) failed: ${failed[*]}"
+            exit 1
+          fi
+          echo "All stacks deployed successfully"
 
       #STEP - Copy Content locally
       #===========================
-      #Copy the contents locally for re-use outside pipelines etc           
+      #Mirror repo content into /config/stacks on the NAS so the local
+      #backup/dockhand tooling can read the same files the workflow just
+      #deployed. Uses rsync --delete so retired stack directories (e.g.
+      #'ai/') are removed on the NAS, not orphaned forever. Excludes
+      #repo-meta dirs (.git, .github, .vscode) and the wireguard config
+      #we used for this run (belt-and-braces; we already rm'd it).
       - name: Copy Content Locally
         run: |
           #cleanup working files
           rm ./wg0.conf
-          scp -r ./* ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
+          rsync -avz --delete \
+            --exclude='.git' --exclude='.github' --exclude='.vscode' \
+            --exclude='wg0.conf' \
+            ./ ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks/
 
       # STEP - Discconect from Wireguard
       # ================================

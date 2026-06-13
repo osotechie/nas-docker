@@ -24,9 +24,9 @@ services:
     # Traefik - Service
     - traefik.enable=false
     # AutoKuma - Uptime Kuma Monitor
-    - kuma.overseerr.http.name=Plex
-    - kuma.overseerr.http.url=http://10.1.11.100:32400/identity
-    - kuma.overseerr.http.parent_name=media
+    - kuma.plex.http.name=Plex
+    - kuma.plex.http.url=http://10.1.11.100:32400/identity
+    - kuma.plex.http.parent_name=media
 
 
   seerr:
@@ -164,11 +164,11 @@ services:
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.Wrapperr.loadbalancer.server.port=8282
+    - traefik.http.services.wrapperr.loadbalancer.server.port=8282
     # Traefik - Router - HTTPS
-    - traefik.http.routers.Wrapperr.rule=Host(`wrapperr.${DOMAIN}`)
-    - traefik.http.routers.Wrapperr.entryPoints=websecure
-    - traefik.http.routers.Wrapperr.middlewares=Real-IP@file, Headers@file
+    - traefik.http.routers.wrapperr.rule=Host(`wrapperr.${DOMAIN}`)
+    - traefik.http.routers.wrapperr.entryPoints=websecure
+    - traefik.http.routers.wrapperr.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
     - kuma.wrapperr.http.name=Wrapperr
     - kuma.wrapperr.http.url=https://wrapperr.${DOMAIN}
@@ -225,11 +225,11 @@ services:
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.Tdarr.loadbalancer.server.port=8265
+    - traefik.http.services.tdarr.loadbalancer.server.port=8265
     # Traefik - Router - HTTPS
-    - traefik.http.routers.Tdarr.rule=Host(`tdarr.${DOMAIN}`)
-    - traefik.http.routers.Tdarr.entryPoints=websecure
-    - traefik.http.routers.Tdarr.middlewares=Real-IP@file, Headers@file
+    - traefik.http.routers.tdarr.rule=Host(`tdarr.${DOMAIN}`)
+    - traefik.http.routers.tdarr.entryPoints=websecure
+    - traefik.http.routers.tdarr.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
     - kuma.tdarr.http.name=Tdarr
     - kuma.tdarr.http.url=https://tdarr.${DOMAIN}
@@ -240,7 +240,7 @@ services:
     container_name: MusicAssistant
     hostname: musicassistant
     image: ghcr.io/music-assistant/server:latest
-    restart: unless-stopped
+    restart: always
     networks:
        IoT:
         ipv4_address: 10.1.11.101
@@ -262,7 +262,7 @@ services:
     - traefik.http.routers.musicassistant.entryPoints=websecure
     - traefik.http.routers.musicassistant.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
-    - kuma.filebmusicassistantrowser.http.name=musicassistant
+    - kuma.musicassistant.http.name=Music Assistant
     - kuma.musicassistant.http.url=https://musicassistant.${DOMAIN}
     - kuma.musicassistant.http.headers=${KUMA_CFHEADERS}
     - kuma.musicassistant.http.parent_name=media
@@ -288,11 +288,11 @@ services:
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.FileBrowser.loadbalancer.server.port=80
+    - traefik.http.services.filebrowser.loadbalancer.server.port=80
     # Traefik - Router - HTTPS
-    - traefik.http.routers.FileBrowser.rule=Host(`media.${DOMAIN}`)
-    - traefik.http.routers.FileBrowser.entryPoints=websecure
-    - traefik.http.routers.FileBrowser.middlewares=Real-IP@file, Headers@file
+    - traefik.http.routers.filebrowser.rule=Host(`media.${DOMAIN}`)
+    - traefik.http.routers.filebrowser.entryPoints=websecure
+    - traefik.http.routers.filebrowser.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
     - kuma.filebrowser.http.name=FileBrowser
     - kuma.filebrowser.http.url=https://media.${DOMAIN}

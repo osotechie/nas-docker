@@ -40,7 +40,7 @@ services:
       - --experimental.plugins.traefik-real-ip.modulename=github.com/soulbalz/traefik-real-ip
       - --experimental.plugins.traefik-real-ip.version=v1.0.3
       # Logging
-      - --log.level=DEBUG
+      - --log.level=INFO
       - --log.filePath=/var/log/traefik/traefik.log
       - --accesslog=true
       - --accesslog.filepath=/var/log/traefik/access.log

@@ -25,32 +25,29 @@ jobs:
     
     steps:
    
-      # STEP - Check-out Rep
+      # STEP - Check-out Repo
       # ====================
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check-out Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # STEP - Validate docker stacks
       # =============================
       # Run a validation check on all the docker-compose.yml files for the different stacks
       - name: Validate Docker Stacks
-        uses: zyborg/pester-tests-report@v1
+        uses: zyborg/pester-tests-report@bb711b31e93f78f7423086d57f81928325829765 # v1
         with:
           include_paths: .github/workflows/tests
-          #exclude_paths:
-          #exclude_tags: skip_ci
           tests_fail_step: true
           report_name: Docker Stacks Validation
           report_title: Docker Stacks Validation
-          result_value: Passed
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # STEP - Microsoft Security DevOps
       # ================================
       # Run a security check on everything for potential security issues
       - name: Run Microsoft Security DevOps
-        uses: microsoft/security-devops-action@v1
+        uses: microsoft/security-devops-action@08976cb623803b1b36d7112d4ff9f59eae704de0 # v1.12.0
         id: msdo
         with:
           tools: checkov, trivy
@@ -59,6 +56,6 @@ jobs:
       # ===============================================
       # Upload the results of the Microsoft Security DevOps to the repo
       - name: Upload results to Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3
         with:
           sarif_file: ${{ steps.msdo.outputs.sarifFile }}
