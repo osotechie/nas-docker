@@ -64,6 +64,7 @@ services:
     networks:
       games:
         ipv4_address: 10.1.20.3
+        # NOTE: do not change this MAC address — AMP's licence is bound to it.
         mac_address: 02:42:AC:C1:3B:68 # Please see the README about this field.
     volumes:
       - ${DOCKERDIR}/amp:/home/amp/.ampdata

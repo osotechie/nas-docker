@@ -29,13 +29,13 @@ jobs:
       # ====================
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check-out Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # STEP - Connect to Azure
       # =======================
       # This step is used to connect to Azure to allow reading of Azure KeyVault in later step
       - name: Connect to Azure
-        uses: azure/login@v2
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
         with:
           creds: ${{ secrets.AZURE_SPN_CREDENTIALS }}
 
@@ -43,7 +43,7 @@ jobs:
       # =================================
       # Get Secrets from Azure KeyVault and store them as env variables as secrets for use later   
       - name: Get Azure KeyVault Secrets
-        uses: copdips/get-azure-keyvault-secrets-action@v1
+        uses: copdips/get-azure-keyvault-secrets-action@b823bc9a2bc24c45a58ba09dc234cf4be05f38d7 # v1
         with:
           keyvault: ${{ secrets.AZURE_KEYVAULT_NAME }}
           
@@ -51,7 +51,7 @@ jobs:
       # ===================================
       # Replaces tokens (e.g. #{TOKEN}#) in files with the matching environment variable of the same token name           
       - name: Replace tokens in .env files
-        uses: cschleiden/replace-tokens@v1
+        uses: cschleiden/replace-tokens@63252851d87eb5cb853019ba8538b5c51813779d # v1
         with:
           files: '["**/.env"]'
 
@@ -60,8 +60,8 @@ jobs:
       # Install and connect to Wireguard
       - name: Connect to Wireguard
         run: |
-          sudo apt install resolvconf
-          sudo apt install wireguard
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends resolvconf wireguard
           echo "${{ secrets.WG_CONFIG_FILE }}" > wg0.conf
           sudo chmod 600 wg0.conf
           sudo wg-quick up ./wg0.conf
@@ -71,36 +71,42 @@ jobs:
       # Add route to NAS over Wireguard connection 
       - name: Add Routes
         run: |
-          sudo ip route add ${{ secrets.NAS_IP }} via 192.168.200.254 || true
+          sudo ip route add ${{ secrets.NAS_IP }} dev wg0 || true
           ip route show
           ping ${{ secrets.NAS_IP }} -c 5
 
        # STEP - Add SSH Keys
       # ====================
-      # Add SSH Key used to connect to NAS
+      # Add SSH Key used to connect to NAS, and pin the NAS's host keys
+      # so we refuse to talk to anything else (replaces the previous
+      # trust-on-first-use ssh-keyscan step, which would silently accept
+      # whatever host key the network handed us each run).
+      # NOTE: If the NAS is ever rebuilt and its /etc/ssh/ssh_host_* keys
+      # regenerated, update the NAS_HOST_KEY secret (environment 'nas')
+      # with the new fingerprints or this step will refuse to connect.
       - name: Add SSH Key
-        uses: shimataro/ssh-key-action@v2
+        uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3 # v2.8.1
         with:
           # SSH private key
           key: ${{secrets.SSH_PRIVATE_KEY}}
-          known_hosts: 'placeholder'
+          known_hosts: ${{ secrets.NAS_HOST_KEY }}
 
-      # STEP - Setup SSH known_host entry
-      # =================================
-      # Add NAS SSH host key to known_hosts file
-      - name: Add SSH known_host entry
-        run: |
-          ssh-keyscan -t rsa ${{ secrets.NAS_IP }} >> ~/.ssh/known_hosts
-
-      # FIX - Add ssh config for Docker
-      # =================================
+      # STEP - Configure ssh  for Docker
+      # ================================
       # Add the following ssh configs as per docker suggestion https://docs.docker.com/engine/security/protect-access/#ssh-tips          
-      - name: FIX - Add ssh config for Docker
+      - name: Configure SSH
         run: |
-          set -x
-          echo ControlMaster     auto >> ~/.ssh/config
-          echo ControlPath       ~/.ssh/control-%C >> ~/.ssh/config
-          echo ControlPersist    yes >> ~/.ssh/config
+          {
+            echo "Host *"
+            echo "  ServerAliveInterval 30"
+            echo "  ServerAliveCountMax 10"
+            echo "  TCPKeepAlive yes"
+            echo "  ConnectTimeout 30"
+            echo "  ControlMaster auto"
+            echo "  ControlPath ~/.ssh/control-%C"
+            echo "  ControlPersist 10m"
+          } >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       # STEP - Connect to NAS Docker
       # ============================
@@ -113,26 +119,65 @@ jobs:
 
       # STEP - Deploy Stacks
       # ====================
-      # Deploy docker stacks locally  
+      # Deploy docker stacks locally
+      #
+      # COMPOSE_PARALLEL_LIMIT=3 caps how many container operations Compose
+      # runs simultaneously per stack. The remote Docker daemon is reached
+      # over SSH, and the NAS's sshd has the default MaxSessions=10. With
+      # the previous unlimited parallelism, the media stack (13 services)
+      # blew past that cap and failed with:
+      #   "Session open refused by peer"
+      # 3 keeps simultaneous SSH channels comfortably below 10 even
+      # accounting for the 2-3 channels each Compose action opens
+      # (container query + image manifest + start). Bump cautiously if
+      # stacks grow much larger, or raise NAS sshd MaxSessions instead.
       - name: Deploy Docker Stacks
+        env:
+          COMPOSE_PARALLEL_LIMIT: 3
         run: |
+          set -eo pipefail
+          failed=()
           for dir in */; do
-            if [ -f "${dir}docker-compose.yml" ]; then
-              cd "$dir"
-              echo "Deploying ${PWD##*/} stack"
-              docker compose up -d
-              cd ..
+            [ -f "${dir}docker-compose.yml" ] || continue
+            stack="${dir%/}"
+            echo "::group::Deploying ${stack}"
+            if ( cd "$dir" && docker compose up -d ); then
+              echo "::endgroup::"
+            else
+              echo "::endgroup::"
+              echo "::error title=Stack deploy failed::${stack} failed to deploy"
+              failed+=("$stack")
             fi
           done
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "::error::${#failed[@]} stack(s) failed: ${failed[*]}"
+            exit 1
+          fi
+          echo "All stacks deployed successfully"
 
       #STEP - Copy Content locally
       #===========================
-      #Copy the contents locally for re-use outside pipelines etc           
+      #Mirror repo content into /config/stacks on the NAS so the local
+      #backup/dockhand tooling can read the same files the workflow just
+      #deployed. Uses rsync --delete so retired stack directories (e.g.
+      #'ai/') are removed on the NAS, not orphaned forever. Excludes
+      #repo-meta dirs (.git, .github, .vscode) and the wireguard config
+      #we used for this run (belt-and-braces; we already rm'd it).
+      #
+      #-rlpgoD instead of -a: drops -t (preserve mtimes) because the
+      #stack directories on the NAS are owned by root, but we connect
+      #as owen. Only inode owners (or root) can update directory mtimes,
+      #so -t fails with 'Operation not permitted' even though the file
+      #content sync succeeds. Without -t, dir mtimes reflect "last
+      #deploy time" which is more useful here anyway.
       - name: Copy Content Locally
         run: |
           #cleanup working files
           rm ./wg0.conf
-          scp -r ./* ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
+          rsync -rlpgoDvz --delete \
+            --exclude='.git' --exclude='.github' --exclude='.vscode' \
+            --exclude='wg0.conf' \
+            ./ ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks/
 
       # STEP - Discconect from Wireguard
       # ================================
