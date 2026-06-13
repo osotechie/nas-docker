@@ -60,8 +60,8 @@ jobs:
       # Install and connect to Wireguard
       - name: Connect to Wireguard
         run: |
-          sudo apt install resolvconf
-          sudo apt install wireguard
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends resolvconf wireguard
           echo "${{ secrets.WG_CONFIG_FILE }}" > wg0.conf
           sudo chmod 600 wg0.conf
           sudo wg-quick up ./wg0.conf
