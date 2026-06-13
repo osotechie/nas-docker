@@ -1,0 +1,23 @@
+# Dependabot configuration
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# We pin third-party (and even first-party) GitHub Actions to commit SHAs to
+# protect against tag-rewrite supply-chain attacks. Dependabot watches each
+# pinned action and opens a PR when a new version is released, with the
+# resolved SHA already in place — so upgrades stay simple while pinning
+# stays strict.
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+      include: scope
+    labels:
+      - dependencies
+      - github-actions

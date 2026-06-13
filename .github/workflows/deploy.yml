@@ -29,13 +29,13 @@ jobs:
       # ====================
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check-out Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # STEP - Connect to Azure
       # =======================
       # This step is used to connect to Azure to allow reading of Azure KeyVault in later step
       - name: Connect to Azure
-        uses: azure/login@v2
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
         with:
           creds: ${{ secrets.AZURE_SPN_CREDENTIALS }}
 
@@ -43,7 +43,7 @@ jobs:
       # =================================
       # Get Secrets from Azure KeyVault and store them as env variables as secrets for use later   
       - name: Get Azure KeyVault Secrets
-        uses: copdips/get-azure-keyvault-secrets-action@v1
+        uses: copdips/get-azure-keyvault-secrets-action@b823bc9a2bc24c45a58ba09dc234cf4be05f38d7 # v1
         with:
           keyvault: ${{ secrets.AZURE_KEYVAULT_NAME }}
           
@@ -51,7 +51,7 @@ jobs:
       # ===================================
       # Replaces tokens (e.g. #{TOKEN}#) in files with the matching environment variable of the same token name           
       - name: Replace tokens in .env files
-        uses: cschleiden/replace-tokens@v1
+        uses: cschleiden/replace-tokens@63252851d87eb5cb853019ba8538b5c51813779d # v1
         with:
           files: '["**/.env"]'
 
@@ -79,7 +79,7 @@ jobs:
       # ====================
       # Add SSH Key used to connect to NAS
       - name: Add SSH Key
-        uses: shimataro/ssh-key-action@v2
+        uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3 # v2.8.1
         with:
           # SSH private key
           key: ${{secrets.SSH_PRIVATE_KEY}}
