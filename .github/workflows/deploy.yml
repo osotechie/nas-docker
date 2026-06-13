@@ -120,7 +120,20 @@ jobs:
       # STEP - Deploy Stacks
       # ====================
       # Deploy docker stacks locally
+      #
+      # COMPOSE_PARALLEL_LIMIT=3 caps how many container operations Compose
+      # runs simultaneously per stack. The remote Docker daemon is reached
+      # over SSH, and the NAS's sshd has the default MaxSessions=10. With
+      # the previous unlimited parallelism, the media stack (13 services)
+      # blew past that cap and failed with:
+      #   "Session open refused by peer"
+      # 3 keeps simultaneous SSH channels comfortably below 10 even
+      # accounting for the 2-3 channels each Compose action opens
+      # (container query + image manifest + start). Bump cautiously if
+      # stacks grow much larger, or raise NAS sshd MaxSessions instead.
       - name: Deploy Docker Stacks
+        env:
+          COMPOSE_PARALLEL_LIMIT: 3
         run: |
           set -eo pipefail
           failed=()
