@@ -47,7 +47,7 @@ services:
     - traefik.http.services.adguardhome-sync.loadbalancer.server.port=8080
     # Traefik - Router - HTTPS
     - traefik.http.routers.adguardhome-sync.rule=Host(`adguard-sync.${DOMAIN}`)
-    - traefik.http.routers.speeadguardhome-syncdtest.entryPoints=websecure
+    - traefik.http.routers.adguardhome-sync.entryPoints=websecure
     - traefik.http.routers.adguardhome-sync.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
     - kuma.adguardsync.http.name=AdGuard Home Sync

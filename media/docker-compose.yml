@@ -24,9 +24,9 @@ services:
     # Traefik - Service
     - traefik.enable=false
     # AutoKuma - Uptime Kuma Monitor
-    - kuma.overseerr.http.name=Plex
-    - kuma.overseerr.http.url=http://10.1.11.100:32400/identity
-    - kuma.overseerr.http.parent_name=media
+    - kuma.plex.http.name=Plex
+    - kuma.plex.http.url=http://10.1.11.100:32400/identity
+    - kuma.plex.http.parent_name=media
 
 
   seerr:
@@ -262,7 +262,7 @@ services:
     - traefik.http.routers.musicassistant.entryPoints=websecure
     - traefik.http.routers.musicassistant.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
-    - kuma.filebmusicassistantrowser.http.name=musicassistant
+    - kuma.musicassistant.http.name=Music Assistant
     - kuma.musicassistant.http.url=https://musicassistant.${DOMAIN}
     - kuma.musicassistant.http.headers=${KUMA_CFHEADERS}
     - kuma.musicassistant.http.parent_name=media

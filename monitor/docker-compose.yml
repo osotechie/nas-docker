@@ -52,7 +52,7 @@ services:
       - apparmor:unconfined
     volumes:
       - ${DOCKERDIR}/netdata/config:/etc/netdata
-      - ${DOCKERDIR}/netdata/lib:/varl/lib/netdata
+      - ${DOCKERDIR}/netdata/lib:/var/lib/netdata
       - ${DOCKERDIR}/netdata/cache:/var/cache/netdata
       - /etc/passwd:/host/etc/passwd:ro
       - /etc/group:/host/etc/group:ro
