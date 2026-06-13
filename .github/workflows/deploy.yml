@@ -144,12 +144,20 @@ jobs:
 
       #STEP - Copy Content locally
       #===========================
-      #Copy the contents locally for re-use outside pipelines etc           
+      #Mirror repo content into /config/stacks on the NAS so the local
+      #backup/dockhand tooling can read the same files the workflow just
+      #deployed. Uses rsync --delete so retired stack directories (e.g.
+      #'ai/') are removed on the NAS, not orphaned forever. Excludes
+      #repo-meta dirs (.git, .github, .vscode) and the wireguard config
+      #we used for this run (belt-and-braces; we already rm'd it).
       - name: Copy Content Locally
         run: |
           #cleanup working files
           rm ./wg0.conf
-          scp -r ./* ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks
+          rsync -avz --delete \
+            --exclude='.git' --exclude='.github' --exclude='.vscode' \
+            --exclude='wg0.conf' \
+            ./ ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks/
 
       # STEP - Discconect from Wireguard
       # ================================
