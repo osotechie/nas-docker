@@ -164,17 +164,24 @@ jobs:
       #repo-meta dirs (.git, .github, .vscode) and the wireguard config
       #we used for this run (belt-and-braces; we already rm'd it).
       #
-      #-rlpgoD instead of -a: drops -t (preserve mtimes) because the
-      #stack directories on the NAS are owned by root, but we connect
-      #as owen. Only inode owners (or root) can update directory mtimes,
-      #so -t fails with 'Operation not permitted' even though the file
-      #content sync succeeds. Without -t, dir mtimes reflect "last
-      #deploy time" which is more useful here anyway.
+      #Why -rlvz + --no-perms/owner/group/times instead of -a:
+      #The /config/stacks/* directories on the NAS are owned by root.
+      #We connect as owen (rwx via POSIX ACL but not the inode owner).
+      #Only the inode owner (or root) can update directory metadata
+      #(chmod, chown, chgrp, utimes), so every flag in -a that touches
+      #directory metadata fails with 'Operation not permitted' — both
+      #-t (PR #83 dropped this) and -p (still failing). Rather than
+      #removing flags one error at a time, just drop ALL metadata
+      #preservation. We only care about file content here; the NAS
+      #already has correct dir perms from earlier setup, and new files
+      #get sensible defaults (umask 022 -> 644). No executable scripts
+      #in this repo so dropping perms is safe.
       - name: Copy Content Locally
         run: |
           #cleanup working files
           rm ./wg0.conf
-          rsync -rlpgoDvz --delete \
+          rsync -rlvz --delete \
+            --no-perms --no-owner --no-group --no-times \
             --exclude='.git' --exclude='.github' --exclude='.vscode' \
             --exclude='wg0.conf' \
             ./ ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks/
