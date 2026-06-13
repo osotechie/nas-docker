@@ -77,20 +77,19 @@ jobs:
 
        # STEP - Add SSH Keys
       # ====================
-      # Add SSH Key used to connect to NAS
+      # Add SSH Key used to connect to NAS, and pin the NAS's host keys
+      # so we refuse to talk to anything else (replaces the previous
+      # trust-on-first-use ssh-keyscan step, which would silently accept
+      # whatever host key the network handed us each run).
+      # NOTE: If the NAS is ever rebuilt and its /etc/ssh/ssh_host_* keys
+      # regenerated, update the NAS_HOST_KEY secret (environment 'nas')
+      # with the new fingerprints or this step will refuse to connect.
       - name: Add SSH Key
         uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3 # v2.8.1
         with:
           # SSH private key
           key: ${{secrets.SSH_PRIVATE_KEY}}
-          known_hosts: 'placeholder'
-
-      # STEP - Setup SSH known_host entry
-      # =================================
-      # Add NAS SSH host key to known_hosts file
-      - name: Add SSH known_host entry
-        run: |
-          ssh-keyscan -t rsa ${{ secrets.NAS_IP }} >> ~/.ssh/known_hosts
+          known_hosts: ${{ secrets.NAS_HOST_KEY }}
 
       # STEP - Configure ssh  for Docker
       # ================================
