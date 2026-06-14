@@ -12,8 +12,8 @@ services:
       - ${DOCKERDIR}/hermes-node-nas/workspace}:/workspace
     environment:
       - TZ=${TZ}
-      # Single-password auth - layered behind CF Access at the edge
       - HERMES_WEBUI_PASSWORD=${HERMES_WEBUI_PASS}
+      - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
     labels:
     # Traefik - Service
     - traefik.enable=true
