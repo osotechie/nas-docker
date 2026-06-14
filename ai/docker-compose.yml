@@ -1,32 +1,37 @@
 services:
 
-  Hermes-Node-NAS:
-    container_name: Hermes-Node-NAS
-    hostname: hermes-node-nas
-    image: ghcr.io/nesquena/hermes-webui:latest
+  Hermes:
+    container_name: Hermes
+    hostname: hermes
+    image: nousresearch/hermes-agent:latest
+    command: gateway run
     restart: always
     networks:
       ai:
     volumes:
-      - ${DOCKERDIR}/hermes-node-nas/.hermes:/home/hermeswebui/.hermes
-      - ${DOCKERDIR}/hermes-node-nas/workspace}:/workspace
+      - ${DOCKERDIR}/hermes:/opt/data
     environment:
       - TZ=${TZ}
-      - HERMES_WEBUI_PASSWORD=${HERMES_WEBUI_PASS}
-      - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
+      # Dashboard
+      - HERMES_DASHBOARD=1
+      - HERMES_DASHBOARD_HOST=0.0.0.0
+      - HERMES_DASHBOARD_PORT=9119
+      #- HERMES_DASHBOARD_OAUTH_CLIENT_ID=agent=${HERMES_OAUTH_CLIENTID}
+      #- HERMES_DASHBOARD_AUTH_SECRET={$HERMES_OAUTH_SECRET}
+      - HERMES_DASHBOARD_TRUST_LAN=1
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.hermes-node-nas.loadbalancer.server.port=8787
+    - traefik.http.services.hermes.loadbalancer.server.port=9119
     # Traefik - Router - HTTPS
-    - traefik.http.routers.hermes-node-nas.rule=Host(`hermes-nas.${DOMAIN}`)
-    - traefik.http.routers.hermes-node-nas.entryPoints=websecure
-    - traefik.http.routers.hermes-node-nas.middlewares=Real-IP@file, Headers@file
+    - traefik.http.routers.hermes.rule=Host(`hermes.${DOMAIN}`)
+    - traefik.http.routers.hermes.entryPoints=websecure
+    - traefik.http.routers.hermes.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
-    - kuma.hermes-node-nas.http.name=Hermes (NAS)
-    - kuma.hermes-node-nas.http.url=https://hermes-nas.${DOMAIN}
-    - kuma.hermes-node-nas.http.headers=${KUMA_CFHEADERS}
-    - kuma.hermes-node-nas.http.parent_name=ai
+    - kuma.hermes.http.name=Hermes
+    - kuma.hermes.http.url=https://hermes.${DOMAIN}
+    - kuma.hermes.http.headers=${KUMA_CFHEADERS}
+    - kuma.hermes.http.parent_name=ai
 
 #Shared Networks between containers
 networks:
