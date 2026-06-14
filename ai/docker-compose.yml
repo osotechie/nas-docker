@@ -1,75 +1,32 @@
 services:
 
-  HermesNodeNAS:
+  Hermes-Node-NAS:
     container_name: Hermes-Node-NAS
     hostname: hermes-node-nas
-    image: nousresearch/hermes-agent:latest
-    command: gateway run
-    restart: always
-    networks:
-      ai:
-    volumes:
-      - ${DOCKERDIR}/hermes:/opt/data
-    environment:
-      - TZ=${TZ}
-      # Dashboard
-      - HERMES_DASHBOARD=1
-      - HERMES_DASHBOARD_HOST=0.0.0.0
-      - HERMES_DASHBOARD_PORT=9119
-      # Dashboard auth (basic) - defence in depth behind CF Access
-      - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=${HERMES_DASH_USER}
-      - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=${HERMES_DASH_PASS}
-      - HERMES_DASHBOARD_BASIC_AUTH_SECRET=${HERMES_DASH_SECRET}
-    labels:
-    # Traefik - Service
-    - traefik.enable=true
-    - traefik.http.services.hermes-node-nas.loadbalancer.server.port=9119
-    # Traefik - Router - HTTPS
-    - traefik.http.routers.hermes-node-nas.rule=Host(`hermes-node-nas.${DOMAIN}`)
-    - traefik.http.routers.hermes-node-nas.entryPoints=websecure
-    - traefik.http.routers.hermes-node-nas.middlewares=Real-IP@file, Headers@file
-    # AutoKuma - Uptime Kuma Monitor
-    - kuma.hermes-node-nas.http.name=Hermes Node (NAS)
-    - kuma.hermes-node-nas.http.url=https://hermes-node-nas.${DOMAIN}
-    - kuma.hermes-node-nas.http.headers=${KUMA_CFHEADERS}
-    - kuma.hermes-node-nas.http.parent_name=ai
-
-
-  HermesWebUI:
-    container_name: Hermes-WebUI
-    hostname: hermes-webui
     image: ghcr.io/nesquena/hermes-webui:latest
     restart: always
-    depends_on:
-      - HermesNodeNAS
     networks:
       ai:
     volumes:
       # Shared with HermesNodeNAS - sessions/skills/memory visible to both
-      - ${DOCKERDIR}/hermes:/home/hermeswebui/.hermes
-      # Workspace for the WebUI file browser (sessions can reference files here)
-      - ${DOCKERDIR}/hermes-webui/workspace:/workspace
+      - ${DOCKERDIR}/hermes-node-nas:/home/hermeswebui/.hermes
     environment:
       - TZ=${TZ}
-      # Run as root inside the container so UIDs line up with HermesNodeNAS
-      # (which writes /opt/data as root). Avoids cross-container permission errors.
-      - WANTED_UID=0
-      - WANTED_GID=0
       # Single-password auth - layered behind CF Access at the edge
       - HERMES_WEBUI_PASSWORD=${HERMES_WEBUI_PASS}
     labels:
     # Traefik - Service
     - traefik.enable=true
-    - traefik.http.services.hermes-webui.loadbalancer.server.port=8787
+    - traefik.http.services.hermes-node-nas.loadbalancer.server.port=8787
     # Traefik - Router - HTTPS
-    - traefik.http.routers.hermes-webui.rule=Host(`hermes.${DOMAIN}`)
-    - traefik.http.routers.hermes-webui.entryPoints=websecure
-    - traefik.http.routers.hermes-webui.middlewares=Real-IP@file, Headers@file
+    - traefik.http.routers.hermes-node-nas.rule=Host(`hermes-nas.${DOMAIN}`)
+    - traefik.http.routers.hermes-node-nas.entryPoints=websecure
+    - traefik.http.routers.hermes-node-nas.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
-    - kuma.hermes-webui.http.name=Hermes (WebUI)
-    - kuma.hermes-webui.http.url=https://hermes.${DOMAIN}
-    - kuma.hermes-webui.http.headers=${KUMA_CFHEADERS}
-    - kuma.hermes-webui.http.parent_name=ai
+    - kuma.hermes-node-nas.http.name=Hermes (NAS)
+    - kuma.hermes-node-nas.http.url=https://hermes-nas.${DOMAIN}
+    - kuma.hermes-node-nas.http.headers=${KUMA_CFHEADERS}
+    - kuma.hermes-node-nas.http.parent_name=ai
 
 #Shared Networks between containers
 networks:
