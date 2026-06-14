@@ -8,8 +8,8 @@ services:
     networks:
       ai:
     volumes:
-      # Shared with HermesNodeNAS - sessions/skills/memory visible to both
-      - ${DOCKERDIR}/hermes-node-nas:/home/hermeswebui/.hermes
+      - ${DOCKERDIR}/hermes-node-nas/.hermes:/home/hermeswebui/.hermes
+      - ${DOCKERDIR}/hermes-node-nas/workspace}:/workspace
     environment:
       - TZ=${TZ}
       # Single-password auth - layered behind CF Access at the edge
