@@ -90,7 +90,6 @@ services:
     image: ayufan/proxmox-backup-server:latest
     restart: always
     networks:
-    networks:
       IoT:
         ipv4_address: 10.1.11.210
     volumes:
@@ -116,7 +115,7 @@ services:
     - kuma.pbs.http.headers=${KUMA_CFHEADERS}
     - kuma.pbs.http.parent_name=storage
 
-    
+
 #Shared Networks between containers
 networks:
   #Internal Docker Networks
