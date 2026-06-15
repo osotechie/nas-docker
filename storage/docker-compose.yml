@@ -83,8 +83,52 @@ services:
     - kuma.crashplan.http.headers=${KUMA_CFHEADERS}
     - kuma.crashplan.http.parent_name=storage
 
+
+  PBS:
+    container_name: pbs
+    hostname: pbs
+    image: ayufan/proxmox-backup-server:latest
+    restart: always
+    networks:
+    networks:
+      IoT:
+        ipv4_address: 10.1.11.210
+    volumes:
+      - ${DOCKERDIR}/pbs/etc:/etc/proxmox-backup
+      - ${DOCKERDIR}/pbs/var/log:/var/log/proxmox-backup
+      - ${DOCKERDIR}/pbs/var/lib:/var/lib/proxmox-backup
+      - /mnt/storage/backups/pve:/backups
+    tmpfs:
+      - /run
+    cap_add:
+      - SYS_RAWIO # smartctl support
+    labels:
+    # Traefik - Service
+    - traefik.enable=true
+    - traefik.http.services.pbs.loadbalancer.server.port=8007
+    # Traefik - Router - HTTPS
+    - traefik.http.routers.pbs.rule=Host(`pbs.${DOMAIN}`)
+    - traefik.http.routers.pbs.entryPoints=websecure
+    - traefik.http.routers.pbs.middlewares=Real-IP@file, Headers@file
+    # AutoKuma - Uptime Kuma Monitor
+    - kuma.pbs.http.name=pbs
+    - kuma.pbs.http.url=https://crashplan.${DOMAIN}
+    - kuma.pbs.http.headers=${KUMA_CFHEADERS}
+    - kuma.pbs.http.parent_name=storage
+
+    
 #Shared Networks between containers
 networks:
   #Internal Docker Networks
   storage:
     name: storage
+  #External VLANs
+  IoT:
+    name: O.and.A (IoT)
+    driver: macvlan
+    driver_opts:
+      parent: eno1.10
+    ipam:
+      config:
+        - subnet: 10.1.10.0/23
+          gateway: 10.1.10.254
