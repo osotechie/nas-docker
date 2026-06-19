@@ -111,7 +111,7 @@ services:
     - traefik.http.routers.pbs.middlewares=Real-IP@file, Headers@file
     # AutoKuma - Uptime Kuma Monitor
     - kuma.pbs.http.name=pbs
-    - kuma.pbs.http.url=https://crashplan.${DOMAIN}
+    - kuma.pbs.http.url=https://pbs.${DOMAIN}
     - kuma.pbs.http.headers=${KUMA_CFHEADERS}
     - kuma.pbs.http.parent_name=storage
 
