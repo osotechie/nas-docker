@@ -7,7 +7,8 @@ services:
     command: gateway run
     restart: always
     networks:
-      ai:
+      IoT:
+        ipv4_address: 10.1.11.20
     volumes:
       - ${DOCKERDIR}/hermes:/opt/data
     environment:
@@ -37,3 +38,13 @@ networks:
   #Internal Docker Networks
   ai:
     name: ai
+  #External VLANs
+  IoT:
+    name: O.and.A (IoT)
+    driver: macvlan
+    driver_opts:
+      parent: eno1.10
+    ipam:
+      config:
+        - subnet: 10.1.10.0/23
+          gateway: 10.1.10.254
