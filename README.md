@@ -18,6 +18,8 @@ This repo is for my docker stacks I use on my home NAS. I am trying to adhere to
 
 ---
 
+<br>
+
 ## 🏗️ Structure
 I have created the following structure to store my docker stacks. The structure reflects the different functions I use docker for.
 
@@ -27,21 +29,7 @@ I have created the following structure to store my docker stacks. The structure 
 └─🗒️ docker-compose.yml    -  contains the configuration for each of the docker containers I run related to the functional area.
 ```
 
-## 🤐 Secrets & Variables
-To avoid storing secrets in the .env or docker-compose.yml files I use a combination of environment variables GitHub Secrets, and Azure KeyVault.
-
-For any sensitive information contained within the docker-compose.yml I specify environment variable tags (e.g. ${TAG}), that I then create a matching entry in the associated .env file for the docker stack.
-
-> [!NOTE]
-> For more information about using environment variables in your docker compose files, refer to the following [Ways to set environment variables with Compose | Docker Docs](https://docs.docker.com/compose/environment-variables/set-environment-variables/).  
-
-
-Within the .env file I then create a token (e.g. #{TAG}#), that I can then use the [Replace Token](https://github.com/marketplace/actions/replace-tokens) step to update the value with the actual secret from either GitHub Action Repo Secrets, or Azure KeyVault.
-
-For GitHub Secrets I simply create a new GitHub Action Repo Secret, this will automatically be made available to any Actions in the repo, and the "Replace Tokens" step to update the .env files. I typically don't use GitHub Action Repo Secrets as you can't easily edit or see the current value of the Secret.
-
-For Azure KeyVault secrets, I use several additional steps within the GitHub Action to securely connect to Azure KeyVault and retreive secrets ([Azure KeyVault - Get Secrets Fast](https://github.com/marketplace/actions/azure-keyvault-get-secrets-fast)) which then makes them available as secrets within the running Action (just like GitHub Actions Repo Secret).
-
+<br>
 
 ## 📑 TEMPLATES
 
@@ -63,6 +51,8 @@ MYSECRET=#{MYSECRET}#
 > Remember to update the following in the above template with the correct values:
 >
 > - [x] ***{functional area}*** - replace this with the name functional name for this docker stack. I typically name these the same as the folder they reside in (e.g. ai, or proxy)
+
+<br>
 
 ### 🗒️ docker-compose.yml
 The following is a starting template docker-compose.yml file for a new docker stack. This template is based on my own environment and how I typically layout my docker environment.
@@ -109,3 +99,60 @@ I typically like to configure my stacks with the following standards. As such yo
 2. I typically always set my containers to *restart: always* to ensure they automatically restart if there are issues
 3. My traefik services and routers use the name of the container they are releated to
 4. I typically create an internal network per stack, matching the network to the docker stacks name
+
+<br>
+
+## 🚀 GitHub Actions
+<br>
+
+I use GitHub Actions to control the validation and deployment of my docker stacks. This ensure any changes are first validated, before being deployed to the NAS.
+
+### Validation (CI)
+
+**File:** `.github/workflows/validation.yml`
+**Trigger:** Any push to a non-main branch, or manual dispatch.
+
+| Step | Description |
+|------|-------------|
+| Validate Docker Stacks | Runs Pester tests against all `docker-compose.yml` files to check structure and validity |
+| Microsoft Security DevOps | Scans with Checkov and Trivy for security misconfigurations and vulnerabilities |
+| Upload SARIF | Publishes security findings to GitHub Code Scanning (inline PR annotations) |
+
+<br>
+
+### Deploy (CD)
+
+**File:** `.github/workflows/deploy.yml`
+**Trigger:** Pull request merged to `main` (ignoring markdown-only changes).
+
+Deploys all docker stacks to the NAS using a remote Docker daemon over SSH.
+
+| Step | Description |
+|------|-------------|
+| Azure Login | Authenticates to Azure for KeyVault access |
+| Get Secrets | Pulls secrets from Azure KeyVault into the runner environment |
+| Replace Tokens | Substitutes `#{TOKEN}#` placeholders in `.env` files with real values |
+| WireGuard VPN | Connects to home network via WireGuard tunnel |
+| Add Routes | Adds a route to the NAS host over WireGuard |
+| SSH Setup | Configures SSH keys, pinned host fingerprints, and keepalive settings |
+| Connect Docker | Creates a Docker context pointing at the NAS daemon via SSH |
+| Deploy Stacks | Iterates all stack directories and runs `docker compose up -d` (parallel limit of 3) |
+| Copy Content | Mirrors repo content to `/config/stacks/` on the NAS via rsync |
+| Disconnect | Tears down the WireGuard tunnel (always runs) |
+
+<br>
+
+## 🤐 Secrets & Variables
+To avoid storing secrets in the .env or docker-compose.yml files I use a combination of environment variables GitHub Secrets, and Azure KeyVault.
+
+For any sensitive information contained within the docker-compose.yml I specify environment variable tags (e.g. ${TAG}), that I then create a matching entry in the associated .env file for the docker stack.
+
+> [!NOTE]
+> For more information about using environment variables in your docker compose files, refer to the following [Ways to set environment variables with Compose | Docker Docs](https://docs.docker.com/compose/environment-variables/set-environment-variables/).  
+
+
+Within the .env file I then create a token (e.g. #{TAG}#), that I can then use the [Replace Token](https://github.com/marketplace/actions/replace-tokens) step to update the value with the actual secret from either GitHub Action Repo Secrets, or Azure KeyVault.
+
+For GitHub Secrets I simply create a new GitHub Action Repo Secret, this will automatically be made available to any Actions in the repo, and the "Replace Tokens" step to update the .env files. I typically don't use GitHub Action Repo Secrets as you can't easily edit or see the current value of the Secret.
+
+For Azure KeyVault secrets, I use several additional steps within the GitHub Action to securely connect to Azure KeyVault and retreive secrets ([Azure KeyVault - Get Secrets Fast](https://github.com/marketplace/actions/azure-keyvault-get-secrets-fast)) which then makes them available as secrets within the running Action (just like GitHub Actions Repo Secret).
