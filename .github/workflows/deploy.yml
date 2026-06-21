@@ -4,9 +4,7 @@ name: DEPLOY
 
 # Controls when the workflow will run
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - main
     paths-ignore:
@@ -19,7 +17,6 @@ permissions:
 jobs:
 
   deploy:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment: nas
 
