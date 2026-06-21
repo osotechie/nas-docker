@@ -71,9 +71,9 @@ jobs:
       # Add route to NAS over Wireguard connection 
       - name: Add Routes
         run: |
-          sudo ip route add ${{ secrets.NAS_IP }} dev wg0 || true
+          sudo ip route add ${{ env.HOST_IP }} dev wg0 || true
           ip route show
-          ping ${{ secrets.NAS_IP }} -c 5
+          ping ${{ env.HOST_IP }} -c 5
 
        # STEP - Add SSH Keys
       # ====================
@@ -89,7 +89,7 @@ jobs:
         with:
           # SSH private key
           key: ${{secrets.SSH_PRIVATE_KEY}}
-          known_hosts: ${{ secrets.NAS_HOST_KEY }}
+          known_hosts: ${{ secrets.HOST_FINGERPRINT }}
 
       # STEP - Configure ssh  for Docker
       # ================================
@@ -113,7 +113,7 @@ jobs:
       # Connect to NAS Docker Daemon 
       - name: Connect to NAS (Docker Daemon)
         run: |
-          docker context create NAS --docker "host=ssh://${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}"
+          docker context create NAS --docker "host=ssh://${{ env.HOST_USER }}@${{ env.HOST_IP }}"
           docker context use NAS
           docker info
 
@@ -184,7 +184,7 @@ jobs:
             --no-perms --no-owner --no-group --no-times \
             --exclude='.git' --exclude='.github' --exclude='.vscode' \
             --exclude='wg0.conf' \
-            ./ ${{ secrets.NAS_USER }}@${{ secrets.NAS_IP }}:/config/stacks/
+            ./ ${{ env.HOST_USER }}@${{ env.HOST_IP }}:/config/stacks/
 
       # STEP - Discconect from Wireguard
       # ================================
