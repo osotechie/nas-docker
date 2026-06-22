@@ -12,7 +12,7 @@ services:
     environment:
       #WEBSOCKET_ENABLED: 'true' # Required to use websockets
       SIGNUPS_ALLOWED: 'false'   # set to false to disable signups
-      ADMIN_TOKEN: '${BITWARDEN_ADMIN}'
+      ADMIN_TOKEN: ${BITWARDEN_ADMIN_TOKEN}
       # Push Notification based on https://2nistech.world/vaultwarden-activate-push-notification-for-mobile-devices/
       PUSH_ENABLED: 'true'
       PUSH_INSTALLATION_ID: ${BITWARDEN_INSTALLATIONID}
