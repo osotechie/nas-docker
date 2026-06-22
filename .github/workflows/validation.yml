@@ -13,7 +13,6 @@ on:
 
 permissions:
   contents: read
-  checks: write
   actions: read
   security-events: write
 
@@ -29,19 +28,62 @@ jobs:
       # ====================
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check-out Repo
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       # STEP - Validate docker stacks
       # =============================
-      # Run a validation check on all the docker-compose.yml files for the different stacks
+      # Run Pester tests to validate all docker-compose.yml files,
+      # output JUnit XML for CI tooling, and generate a Job Summary
+      # table showing pass/fail per stack.
       - name: Validate Docker Stacks
-        uses: zyborg/pester-tests-report@bb711b31e93f78f7423086d57f81928325829765 # v1
-        with:
-          include_paths: .github/workflows/tests
-          tests_fail_step: true
-          report_name: Docker Stacks Validation
-          report_title: Docker Stacks Validation
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        id: pester
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = '.github/workflows/tests'
+          $config.Run.Exit = $false
+          $config.Run.PassThru = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = 'test-results.xml'
+          $config.TestResult.OutputFormat = 'JUnitXml'
+
+          $result = Invoke-Pester -Configuration $config
+
+          # Generate Job Summary
+          $summary = @()
+          $summary += '## 🐳 Docker Stacks Validation'
+          $summary += ''
+          if ($result.FailedCount -eq 0) {
+            $summary += '### ✅ Result: **ALL STACKS VALID**'
+          } else {
+            $summary += "### ❌ Result: **$($result.FailedCount) STACK(S) FAILED**"
+          }
+          $summary += ''
+          $summary += "| Stack | Result | Duration |"
+          $summary += "|-------|--------|----------|"
+
+          # Pester 5 nests tests under Containers → Blocks → Tests
+          $tests = $result.Containers.Blocks.Tests
+
+          foreach ($test in $tests) {
+            $name = $test.ExpandedName -replace 'Stack (.+) is valid', '$1'
+            $icon = if ($test.Result -eq 'Passed') { '✅' } else { '❌' }
+            $duration = '{0:N1}s' -f $test.Duration.TotalSeconds
+            $summary += "| ``$name`` | $icon $($test.Result) | $duration |"
+          }
+
+          $summary += ''
+          $summary += "---"
+          $summary += "**Total:** $($result.PassedCount) passed, $($result.FailedCount) failed, $($result.SkippedCount) skipped — ⏱️ $('{0:N1}s' -f $result.Duration.TotalSeconds)"
+
+          $summary -join "`n" >> $env:GITHUB_STEP_SUMMARY
+
+          # Fail the step if any tests failed
+          if ($result.FailedCount -gt 0) {
+            Write-Error "$($result.FailedCount) stack(s) failed validation"
+            exit 1
+          }
 
       # STEP - Microsoft Security DevOps
       # ================================
