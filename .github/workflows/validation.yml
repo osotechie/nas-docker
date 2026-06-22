@@ -62,7 +62,10 @@ jobs:
           $summary += "| Stack | Result | Duration |"
           $summary += "|-------|--------|----------|"
 
-          foreach ($test in $result.Tests) {
+          # Pester 5 nests tests under Containers → Blocks → Tests
+          $tests = $result.Containers.Blocks.Tests
+
+          foreach ($test in $tests) {
             $name = $test.ExpandedName -replace 'Stack (.+) is valid', '$1'
             $icon = if ($test.Result -eq 'Passed') { '✅' } else { '❌' }
             $duration = '{0:N1}s' -f $test.Duration.TotalSeconds
