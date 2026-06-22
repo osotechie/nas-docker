@@ -42,6 +42,7 @@ jobs:
           $config = New-PesterConfiguration
           $config.Run.Path = '.github/workflows/tests'
           $config.Run.Exit = $false
+          $config.Run.PassThru = $true
           $config.Output.Verbosity = 'Detailed'
           $config.TestResult.Enabled = $true
           $config.TestResult.OutputPath = 'test-results.xml'
