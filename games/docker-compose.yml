@@ -69,7 +69,7 @@ services:
     volumes:
       - ${DOCKERDIR}/amp:/home/amp/.ampdata
     environment:
-      - TZ=Pacific/Auckland # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      - TZ=${TZ}
       - AMP_LICENSE=${AMP_LICENSE}
       - MODULE=ADS
     labels:
@@ -95,6 +95,7 @@ services:
       games:
         ipv4_address: 10.1.20.253
     environment:
+      - TZ=${TZ}
       - SECRET_KEY=${PLAYIT_SECRET}
 
 #Shared Networks between containers    

@@ -318,7 +318,7 @@ jobs:
           rsync -rlvz --delete \
             --no-perms --no-owner --no-group --no-times \
             --exclude='.git' --exclude='.github' --exclude='.vscode' \
-            --exclude='wg0.conf' \
+            --exclude='wg0.conf' --exclude='deploy-logs' \
             ./ ${{ vars.HOST_USER }}@${{ vars.HOST_IP }}:/config/stacks/
 
       # STEP - Discconect from Wireguard

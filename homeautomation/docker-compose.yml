@@ -24,6 +24,8 @@ services:
       - ${DOCKERDIR}/homeassistant/.ssh:/root/.ssh
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/run/dbus:/var/run/dbus:ro
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -57,6 +59,8 @@ services:
       - /dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0:/dev/ttyUSB0
     group_add:
       - dialout
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -85,7 +89,8 @@ services:
       - ${DOCKERDIR}/mosquitto/config:/mosquitto/config
       - ${DOCKERDIR}/mosquitto/data:/mosquitto/data
       - ${DOCKERDIR}/mosquitto/log:/mosquitto/log
-  
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - "traefik.enable=false"
@@ -99,6 +104,8 @@ services:
     networks:
        IoT:
         ipv4_address: 10.1.11.17
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -136,6 +143,8 @@ services:
         target: /tmp/cache
         tmpfs:
           size: 1000000000
+    environment:
+      - TZ=${TZ}
     labels:
      # Traefik - Service
     - traefik.enable=true

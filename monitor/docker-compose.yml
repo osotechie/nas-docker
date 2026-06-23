@@ -23,6 +23,7 @@ services:
       - /mnt/storage:/mnt/storage:ro
       - /sys:/sys:ro
     environment:
+    - TZ=${TZ}
     - GLANCES_OPT=-w
     labels:
     # Traefik - Service
@@ -60,6 +61,8 @@ services:
       - /sys:/host/sys:ro
       - /etc/os-release:/host/etc/os-release:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -83,6 +86,7 @@ services:
     networks:
       monitor:
     environment:
+      TZ: ${TZ}
       AUTOKUMA__KUMA__URL: ${KUMA_URL}
       AUTOKUMA__KUMA__USERNAME: ${KUMA_USERNAME}
       AUTOKUMA__KUMA__PASSWORD: ${KUMA_PASSWORD}

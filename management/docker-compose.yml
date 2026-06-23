@@ -12,6 +12,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock 
       - ${DOCKERDIR}/portainer:/data 
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -37,6 +39,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DOCKERDIR}/dockhand:/app/data
       - /config/stacks:/stacks
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -60,6 +64,8 @@ services:
       management:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=${TZ}
     command: --cleanup --interval 3600
     labels: 
     # Traefik - General
@@ -74,6 +80,8 @@ services:
        management:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true

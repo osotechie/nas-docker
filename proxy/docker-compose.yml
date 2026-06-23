@@ -66,6 +66,7 @@ services:
       - ${DOCKERDIR}/traefik/logs:/var/log/traefik
       #- ${DOCKERDIR}/certs:/certs
     environment:
+    - TZ=${TZ}
     - CF_API_EMAIL=${CF_API_EMAIL}
     - CF_API_KEY=${CF_API_KEY}
     labels:
@@ -97,6 +98,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
+      - TZ=${TZ}
       - TRAEFIK_VERSION=2
       - REFRESH_ENTRIES=TRUE
       - CF_EMAIL=${CF_API_EMAIL}
@@ -117,6 +119,8 @@ services:
         ipv4_address: 10.1.254.1
     volumes:
       - ${DOCKERDIR}/cloudflare-tunnel:/home/nonroot/.cloudflared
+    environment:
+      - TZ=${TZ}
     command: tunnel --config /home/nonroot/.cloudflared/config.yml run ${CF_TUNNEL}
 
 
@@ -127,6 +131,8 @@ services:
     restart: always 
     networks:
        proxy:
+    environment:
+      - TZ=${TZ}
     labels: 
     # Traefik - Service
     - traefik.enable=true
