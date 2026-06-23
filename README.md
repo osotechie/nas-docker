@@ -2,10 +2,10 @@
 
 <img src="https://avatars.githubusercontent.com/u/34251619?v=4" align="center" width="144px" height="144px"/>
 
-### NAS Docker Stacks Repo
+### NAS Containers-as-Code
 _... managed with GitHub Actions_ 🤖
 
-[![VALIDATION](https://github.com/osotechie/nas-docker/actions/workflows/validation.yml/badge.svg)](https://github.com/osotechie/nas-docker/actions/workflows/validation.yml) [![DEPLOY](https://github.com/osotechie/nas-docker/actions/workflows/deploy.yml/badge.svg)](https://github.com/osotechie/nas-docker/actions/workflows/deploy.yml)
+[![VALIDATION](https://github.com/osotechie/nas-containers-as-code/actions/workflows/validation.yml/badge.svg)](https://github.com/osotechie/nas-containers-as-code/actions/workflows/validation.yml) [![DEPLOY](https://github.com/osotechie/nas-containers-as-code/actions/workflows/deploy.yml/badge.svg)](https://github.com/osotechie/nas-containers-as-code/actions/workflows/deploy.yml)
 
 </div>
 

@@ -26,7 +26,7 @@ jobs:
       # ====================
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check-out Repo
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       # STEP - Connect to Azure
       # =======================
@@ -38,19 +38,60 @@ jobs:
 
       # STEP - Get Azure KeyVault Secrets
       # =================================
-      # Get Secrets from Azure KeyVault and store them as env variables as secrets for use later   
+      # List all secrets in Azure KeyVault, retrieve each value, mask it,
+      # and export as an environment variable for the Replace Tokens step.
+      # Secret names are uppercased with hyphens replaced by underscores
+      # (e.g. 'my-secret' becomes 'MY_SECRET').
       - name: Get Azure KeyVault Secrets
-        uses: copdips/get-azure-keyvault-secrets-action@b823bc9a2bc24c45a58ba09dc234cf4be05f38d7 # v1
-        with:
-          keyvault: ${{ secrets.AZURE_KEYVAULT_NAME }}
+        run: |
+          SECRET_NAMES=$(az keyvault secret list --vault-name ${{ secrets.AZURE_KEYVAULT_NAME }} --query "[].name" -o tsv)
+          for SECRET_NAME in $SECRET_NAMES; do
+            SECRET_VALUE=$(az keyvault secret show --name "$SECRET_NAME" --vault-name ${{ secrets.AZURE_KEYVAULT_NAME }} --query value -o tsv)
+            echo "::add-mask::$SECRET_VALUE"
+            ENV_NAME=$(echo "$SECRET_NAME" | tr '[:lower:]-' '[:upper:]_')
+            echo "$ENV_NAME=$SECRET_VALUE" >> $GITHUB_ENV
+          done
           
       # STEP - Replace tokens in .env files
       # ===================================
-      # Replaces tokens (e.g. #{TOKEN}#) in files with the matching environment variable of the same token name           
+      # Replaces #{TOKEN}# patterns in files with the matching
+      # environment variable. Uses Python for safe handling of special
+      # characters in secret values (no sed/regex escaping issues).
       - name: Replace tokens in .env files
-        uses: cschleiden/replace-tokens@63252851d87eb5cb853019ba8538b5c51813779d # v1
-        with:
-          files: '["**/.env"]'
+        env:
+          TOKEN_FILES: '**/.env'
+        run: |
+          python3 << 'EOF'
+          import os, glob, re, sys
+
+          pattern = os.environ.get('TOKEN_FILES', '**/.env')
+          count = 0
+          errors = 0
+
+          for path in glob.glob(pattern, recursive=True):
+              try:
+                  with open(path, 'r') as f:
+                      content = f.read()
+
+                  replaced = re.sub(
+                      r'#\{([^}]+)\}#',
+                      lambda m: os.environ.get(m.group(1), m.group(0)),
+                      content
+                  )
+
+                  if replaced != content:
+                      with open(path, 'w') as f:
+                          f.write(replaced)
+                      count += 1
+                      print(f'\u2714 {path}')
+              except Exception:
+                  errors += 1
+                  print(f'\u2716 {path} — failed to process')
+
+          print(f'Done — {count} file(s) updated, {errors} error(s)')
+          if errors > 0:
+              sys.exit(1)
+          EOF
 
       # STEP - Connect to Wireguard
       # ===========================
@@ -82,11 +123,12 @@ jobs:
       # regenerated, update the NAS_HOST_KEY secret (environment 'nas')
       # with the new fingerprints or this step will refuse to connect.
       - name: Add SSH Key
-        uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3 # v2.8.1
-        with:
-          # SSH private key
-          key: ${{secrets.SSH_PRIVATE_KEY}}
-          known_hosts: ${{ secrets.HOST_FINGERPRINT }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.HOST_FINGERPRINT }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
       # STEP - Configure ssh  for Docker
       # ================================
@@ -116,7 +158,7 @@ jobs:
 
       # STEP - Deploy Stacks
       # ====================
-      # Deploy docker stacks locally
+      # Deploy docker stacks to the NAS via the remote Docker context.
       #
       # COMPOSE_PARALLEL_LIMIT=3 caps how many container operations Compose
       # runs simultaneously per stack. The remote Docker daemon is reached
@@ -129,28 +171,124 @@ jobs:
       # (container query + image manifest + start). Bump cautiously if
       # stacks grow much larger, or raise NAS sshd MaxSessions instead.
       - name: Deploy Docker Stacks
+        id: deploy
         env:
           COMPOSE_PARALLEL_LIMIT: 3
         run: |
           set -eo pipefail
+          mkdir -p deploy-logs
           failed=()
+          succeeded=()
           for dir in */; do
             [ -f "${dir}docker-compose.yml" ] || continue
             stack="${dir%/}"
             echo "::group::Deploying ${stack}"
-            if ( cd "$dir" && docker compose up -d ); then
+            if ( cd "$dir" && docker compose up -d ) > "deploy-logs/${stack}.log" 2>&1; then
+              cat "deploy-logs/${stack}.log"
               echo "::endgroup::"
+              succeeded+=("$stack")
             else
+              cat "deploy-logs/${stack}.log"
               echo "::endgroup::"
               echo "::error title=Stack deploy failed::${stack} failed to deploy"
               failed+=("$stack")
             fi
           done
+
+          # Write outcome counts for the report step
+          echo "succeeded=${#succeeded[@]}" >> $GITHUB_OUTPUT
+          echo "failed=${#failed[@]}" >> $GITHUB_OUTPUT
+          echo "succeeded_list=${succeeded[*]}" >> $GITHUB_OUTPUT
+          echo "failed_list=${failed[*]}" >> $GITHUB_OUTPUT
+
           if [ ${#failed[@]} -gt 0 ]; then
             echo "::error::${#failed[@]} stack(s) failed: ${failed[*]}"
             exit 1
           fi
           echo "All stacks deployed successfully"
+        continue-on-error: true
+
+      # STEP - Generate deployment report
+      # ==================================
+      # Parse deploy output into a readable GitHub Actions Job Summary
+      - name: Generate deployment report
+        if: always()
+        run: |
+          echo "## 🚀 Container Stack Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.deploy.outcome }}" = "success" ]; then
+            echo "### ✅ Result: **ALL STACKS DEPLOYED**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Result: **DEPLOYMENT FAILED**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "| Stack | Status | Services |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|----------|" >> $GITHUB_STEP_SUMMARY
+
+          for dir in */; do
+            [ -f "${dir}docker-compose.yml" ] || continue
+            stack="${dir%/}"
+            logfile="deploy-logs/${stack}.log"
+
+            # Count services defined in the compose file
+            svc_count=$(grep -c '^ \{2,4\}[a-zA-Z].*:$' "${dir}docker-compose.yml" 2>/dev/null | head -1 || echo "?")
+
+            if [ -f "$logfile" ] && ! grep -qi 'error\|failed\|exit code' "$logfile"; then
+              echo "| \`${stack}\` | ✅ Deployed | ${svc_count} service(s) |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| \`${stack}\` | ❌ Failed | ${svc_count} service(s) |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Collapsible per-stack logs
+          echo "<details><summary>📋 Deployment Logs</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for logfile in deploy-logs/*.log; do
+            [ -f "$logfile" ] || continue
+            stack=$(basename "$logfile" .log)
+            echo "#### ${stack}" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat "$logfile" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
+
+      # STEP - Post-deploy container status
+      # ====================================
+      # Show running container health on the NAS for visibility
+      - name: Post-deploy container status
+        if: always() && steps.deploy.outcome != 'skipped'
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Container Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}" | sort >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          # Highlight unhealthy containers
+          UNHEALTHY=$(docker ps --filter "health=unhealthy" --format "{{.Names}}" 2>/dev/null || true)
+          if [ -n "$UNHEALTHY" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> ⚠️ **Unhealthy containers:**" >> $GITHUB_STEP_SUMMARY
+            echo "$UNHEALTHY" | while read -r name; do
+              echo "> - \`$name\`" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+      # STEP - Fail on deployment error
+      # ================================
+      # Ensure the workflow fails if any stacks had errors
+      - name: Fail on deployment error
+        if: steps.deploy.outcome != 'success'
+        run: |
+          echo "::error::One or more stacks failed to deploy. See the job summary for details."
+          exit 1
 
       #STEP - Copy Content locally
       #===========================
