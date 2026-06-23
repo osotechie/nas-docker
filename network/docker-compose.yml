@@ -11,6 +11,8 @@ services:
     volumes:
       - ${DOCKERDIR}/adguard/config:/opt/adguardhome/conf
       - ${DOCKERDIR}/adguard/work:/opt/adguardhome/work
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -38,6 +40,7 @@ services:
       IoT:
         ipv4_address: 10.1.11.243
     environment:
+      - TZ=${TZ}
       - CONFIGFILE=/config/adguardhome-sync.yaml #optional
     volumes:
       - ${DOCKERDIR}/adguardhome-sync:/config
@@ -63,6 +66,8 @@ services:
     networks:
       IoT:
         ipv4_address: 10.1.11.242
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true

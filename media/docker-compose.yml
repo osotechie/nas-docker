@@ -18,6 +18,7 @@ services:
     devices:
     - /dev/dri:/dev/dri
     environment:
+    - TZ=${TZ}
     - HOSTNAME=O's
     - ALLOWED_NETWORKS=10.1.1.0/24,10.1.10.0/24,10.1.11.0/24
     labels:
@@ -38,6 +39,8 @@ services:
        media:
     volumes:
       - ${DOCKERDIR}/seerr:/app/config
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -64,6 +67,8 @@ services:
       - ${DOCKERDIR}/sonarr:/config
       - /mnt/storage/downloads:/downloads
       - ${NAS_MEDIADIR}/TV:/tv
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -90,6 +95,8 @@ services:
       - /mnt/storage/downloads:/downloads
       - ${NAS_MEDIADIR}/CHILDREN MOVIES:/kidsmovies
       - ${NAS_MEDIADIR}/MOVIES:/movies
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -113,6 +120,8 @@ services:
        media:
     volumes:
       - ${DOCKERDIR}/maintainerr:/opt/data
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -137,6 +146,8 @@ services:
     volumes:
       - ${DOCKERDIR}/sabnzbd:/config
       - /mnt/storage/downloads:/downloads
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -161,6 +172,8 @@ services:
        media:
     volumes:
       - ${DOCKERDIR}/Wrapperr:/app/config
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -185,6 +198,8 @@ services:
        media:
     volumes:
       - ${DOCKERDIR}/tautulli:/config
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -208,7 +223,7 @@ services:
     networks:
        media:
     environment:
-      - TZ=Pacific/Auckland
+      - TZ=${TZ}
       - UMASK_SET=002
       - webUIPort=8265
       - internalNode=true
@@ -252,6 +267,7 @@ services:
     security_opt:
       - apparmor:unconfined
     environment:
+      - TZ=${TZ}
       - LOG_LEVEL=info
     labels:
     # Traefik - Service

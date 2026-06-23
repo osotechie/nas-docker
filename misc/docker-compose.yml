@@ -7,6 +7,8 @@ services:
     restart: always
     networks:
        misc:
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -39,6 +41,8 @@ services:
     #environment:
     #  - DOCKER_ENABLE_SECURITY=false
       #- LANGS=en_GB
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -63,6 +67,8 @@ services:
        misc:
     volumes:
       - ${DOCKERDIR}/ConvertX/:/app/data
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -89,6 +95,7 @@ services:
     volumes:
       - ${DOCKERDIR}/Open-Design:/app/.od
     environment:
+      - TZ=${TZ}
       - NODE_ENV=production
       - OD_BIND_HOST=0.0.0.0
       - OD_PORT=7456

@@ -10,6 +10,7 @@ services:
     networks:
        security:
     environment:
+      TZ: ${TZ}
       #WEBSOCKET_ENABLED: 'true' # Required to use websockets
       SIGNUPS_ALLOWED: 'false'   # set to false to disable signups
       ADMIN_TOKEN: '${BITWARDEN_ADMIN}'

@@ -18,6 +18,8 @@ services:
       - /dev/sdc:/dev/sdc
       - /dev/sdd:/dev/sdd
       - /dev/sde:/dev/sde
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=false
@@ -43,6 +45,8 @@ services:
       - /dev/sdc:/dev/sdc
       - /dev/sdd:/dev/sdd
       - /dev/sde:/dev/sde
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
@@ -68,6 +72,7 @@ services:
       - ${DOCKERDIR}/crashplan/config:/config
       - /mnt/storage:/storage:ro
     environment:
+      - TZ=${TZ}
       - CRASHPLAN_SRV_MAX_MEM=4G
     labels:
     # Traefik - Service
@@ -101,6 +106,8 @@ services:
       - /run
     cap_add:
       - SYS_RAWIO # smartctl support
+    environment:
+      - TZ=${TZ}
     labels:
     # Traefik - Service
     - traefik.enable=true
